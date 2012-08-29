@@ -3,7 +3,6 @@
 //  ImageEditor
 //
 //  Created by Heitor Ferreira on 8/28/12.
-//  Copyright (c) 2012 Heitor Ferreira. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
