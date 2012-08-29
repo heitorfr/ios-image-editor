@@ -57,7 +57,7 @@
             }];
             [library release];
         }
-        [picker popViewControllerAnimated:YES];
+        [picker popToRootViewControllerAnimated:YES];
         [picker setNavigationBarHidden:NO animated:YES];
     };
     [picker setNavigationBarHidden:YES animated:NO];
