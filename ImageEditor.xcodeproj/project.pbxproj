@@ -1,0 +1,291 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EC23EAED15ECC5610051EA9E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC23EAEC15ECC5610051EA9E /* UIKit.framework */; };
+		EC23EAEF15ECC5610051EA9E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC23EAEE15ECC5610051EA9E /* Foundation.framework */; };
+		EC23EAF115ECC5610051EA9E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC23EAF015ECC5610051EA9E /* CoreGraphics.framework */; };
+		EC23EAF715ECC5610051EA9E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = EC23EAF515ECC5610051EA9E /* InfoPlist.strings */; };
+		EC23EAF915ECC5610051EA9E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = EC23EAF815ECC5610051EA9E /* main.m */; };
+		EC23EAFD15ECC5610051EA9E /* DemoAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EC23EAFC15ECC5610051EA9E /* DemoAppDelegate.m */; };
+		EC23EB0F15ECC5F80051EA9E /* ImageEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EC23EB0D15ECC5F80051EA9E /* ImageEditorViewController.m */; };
+		EC23EB1015ECC5F80051EA9E /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = EC23EB0E15ECC5F80051EA9E /* ImageEditorViewController.xib */; };
+		EC23EB1315ECC6350051EA9E /* ImageEditorCropView.m in Sources */ = {isa = PBXBuildFile; fileRef = EC23EB1215ECC6350051EA9E /* ImageEditorCropView.m */; };
+		ECFB417115EE162300FA7714 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ECFB417015EE162200FA7714 /* AssetsLibrary.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		EC23EAE815ECC5610051EA9E /* ImageEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC23EAEC15ECC5610051EA9E /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		EC23EAEE15ECC5610051EA9E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		EC23EAF015ECC5610051EA9E /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		EC23EAF415ECC5610051EA9E /* ImageEditor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ImageEditor-Info.plist"; sourceTree = "<group>"; };
+		EC23EAF615ECC5610051EA9E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		EC23EAF815ECC5610051EA9E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		EC23EAFA15ECC5610051EA9E /* ImageEditor-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ImageEditor-Prefix.pch"; sourceTree = "<group>"; };
+		EC23EAFB15ECC5610051EA9E /* DemoAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DemoAppDelegate.h; path = ImageEditor/DemoAppDelegate.h; sourceTree = "<group>"; };
+		EC23EAFC15ECC5610051EA9E /* DemoAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = DemoAppDelegate.m; path = ImageEditor/DemoAppDelegate.m; sourceTree = "<group>"; };
+		EC23EB0C15ECC5F80051EA9E /* ImageEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageEditorViewController.h; sourceTree = "<group>"; };
+		EC23EB0D15ECC5F80051EA9E /* ImageEditorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageEditorViewController.m; sourceTree = "<group>"; };
+		EC23EB0E15ECC5F80051EA9E /* ImageEditorViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ImageEditorViewController.xib; sourceTree = "<group>"; };
+		EC23EB1115ECC6350051EA9E /* ImageEditorCropView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageEditorCropView.h; sourceTree = "<group>"; };
+		EC23EB1215ECC6350051EA9E /* ImageEditorCropView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageEditorCropView.m; sourceTree = "<group>"; };
+		ECFB416D15EE15DF00FA7714 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		ECFB417015EE162200FA7714 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EC23EAE515ECC5600051EA9E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ECFB417115EE162300FA7714 /* AssetsLibrary.framework in Frameworks */,
+				EC23EAED15ECC5610051EA9E /* UIKit.framework in Frameworks */,
+				EC23EAEF15ECC5610051EA9E /* Foundation.framework in Frameworks */,
+				EC23EAF115ECC5610051EA9E /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EC23EADD15ECC5600051EA9E = {
+			isa = PBXGroup;
+			children = (
+				ECFB417015EE162200FA7714 /* AssetsLibrary.framework */,
+				ECFB416D15EE15DF00FA7714 /* AVFoundation.framework */,
+				EC23EAFB15ECC5610051EA9E /* DemoAppDelegate.h */,
+				EC23EAFC15ECC5610051EA9E /* DemoAppDelegate.m */,
+				EC23EAF215ECC5610051EA9E /* ImageEditor */,
+				EC23EAEB15ECC5610051EA9E /* Frameworks */,
+				EC23EAE915ECC5610051EA9E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EC23EAE915ECC5610051EA9E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EC23EAE815ECC5610051EA9E /* ImageEditor.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EC23EAEB15ECC5610051EA9E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EC23EAEC15ECC5610051EA9E /* UIKit.framework */,
+				EC23EAEE15ECC5610051EA9E /* Foundation.framework */,
+				EC23EAF015ECC5610051EA9E /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EC23EAF215ECC5610051EA9E /* ImageEditor */ = {
+			isa = PBXGroup;
+			children = (
+				EC23EB0C15ECC5F80051EA9E /* ImageEditorViewController.h */,
+				EC23EB0D15ECC5F80051EA9E /* ImageEditorViewController.m */,
+				EC23EB0E15ECC5F80051EA9E /* ImageEditorViewController.xib */,
+				EC23EB1115ECC6350051EA9E /* ImageEditorCropView.h */,
+				EC23EB1215ECC6350051EA9E /* ImageEditorCropView.m */,
+				EC23EAF315ECC5610051EA9E /* Supporting Files */,
+			);
+			path = ImageEditor;
+			sourceTree = "<group>";
+		};
+		EC23EAF315ECC5610051EA9E /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				EC23EAF415ECC5610051EA9E /* ImageEditor-Info.plist */,
+				EC23EAF515ECC5610051EA9E /* InfoPlist.strings */,
+				EC23EAF815ECC5610051EA9E /* main.m */,
+				EC23EAFA15ECC5610051EA9E /* ImageEditor-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EC23EAE715ECC5600051EA9E /* ImageEditor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC23EB0915ECC5610051EA9E /* Build configuration list for PBXNativeTarget "ImageEditor" */;
+			buildPhases = (
+				EC23EAE415ECC5600051EA9E /* Sources */,
+				EC23EAE515ECC5600051EA9E /* Frameworks */,
+				EC23EAE615ECC5600051EA9E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ImageEditor;
+			productName = ImageEditor;
+			productReference = EC23EAE815ECC5610051EA9E /* ImageEditor.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EC23EADF15ECC5600051EA9E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0440;
+				ORGANIZATIONNAME = "Heitor Ferreira";
+			};
+			buildConfigurationList = EC23EAE215ECC5600051EA9E /* Build configuration list for PBXProject "ImageEditor" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = EC23EADD15ECC5600051EA9E;
+			productRefGroup = EC23EAE915ECC5610051EA9E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EC23EAE715ECC5600051EA9E /* ImageEditor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EC23EAE615ECC5600051EA9E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EC23EAF715ECC5610051EA9E /* InfoPlist.strings in Resources */,
+				EC23EB1015ECC5F80051EA9E /* ImageEditorViewController.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EC23EAE415ECC5600051EA9E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EC23EAF915ECC5610051EA9E /* main.m in Sources */,
+				EC23EAFD15ECC5610051EA9E /* DemoAppDelegate.m in Sources */,
+				EC23EB0F15ECC5F80051EA9E /* ImageEditorViewController.m in Sources */,
+				EC23EB1315ECC6350051EA9E /* ImageEditorCropView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		EC23EAF515ECC5610051EA9E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EC23EAF615ECC5610051EA9E /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		EC23EB0715ECC5610051EA9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EC23EB0815ECC5610051EA9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EC23EB0A15ECC5610051EA9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ImageEditor/ImageEditor-Prefix.pch";
+				INFOPLIST_FILE = "ImageEditor/ImageEditor-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		EC23EB0B15ECC5610051EA9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ImageEditor/ImageEditor-Prefix.pch";
+				INFOPLIST_FILE = "ImageEditor/ImageEditor-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EC23EAE215ECC5600051EA9E /* Build configuration list for PBXProject "ImageEditor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC23EB0715ECC5610051EA9E /* Debug */,
+				EC23EB0815ECC5610051EA9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EC23EB0915ECC5610051EA9E /* Build configuration list for PBXNativeTarget "ImageEditor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC23EB0A15ECC5610051EA9E /* Debug */,
+				EC23EB0B15ECC5610051EA9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EC23EADF15ECC5600051EA9E /* Project object */;
+}
