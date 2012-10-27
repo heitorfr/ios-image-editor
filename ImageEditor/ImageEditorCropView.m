@@ -9,6 +9,7 @@
 - (void) initialize
 {
     self.opaque = NO;
+    self.layer.opacity = 0.8;
     self.backgroundColor = [UIColor clearColor];
 }
 

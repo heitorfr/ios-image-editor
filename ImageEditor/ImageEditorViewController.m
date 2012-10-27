@@ -1,6 +1,9 @@
 #import "ImageEditorViewController.h"
 
 @interface ImageEditorViewController ()
+@property (nonatomic,retain) UIImageView *imageView;
+@property (nonatomic,retain) ImageEditorCropView *cropView;
+
 @property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
 @property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
 @property (retain, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
@@ -10,13 +13,19 @@
 @property(nonatomic,assign) CGPoint scaleCenter;
 @end
 
+static const CGFloat kDefaultCropWidth = 320;
+static const CGFloat kDefaultCropHeight = 320;
+
 @implementation ImageEditorViewController
 
 @synthesize doneCallback = _doneCallback;
 @synthesize sourceImage = _sourceImage;
-
+@synthesize cropWidth = _cropWidth;
+@synthesize cropHeight = _cropHeight;
+@synthesize outputWidth = _outputWidth;
+@synthesize frameView = _frameView;
 @synthesize imageView = _imageView;
-@synthesize cropView = _frameView;
+@synthesize cropView = _cropView;
 @synthesize panRecognizer = _panRecognizer;
 @synthesize rotationRecognizer = _rotationRecognizer;
 @synthesize pinchRecognizer = _pinchRecognizer;
@@ -25,14 +34,13 @@
 @synthesize scaleCenter = _scaleCenter;
 
 
-#define CROP_RECT CGRectMake(0, 50, 320, 320)
-
 - (void) dealloc
 {
+
     [_imageView release];
+    [_cropView release];
     [_frameView release];
     [_doneCallback release];
-    
     [_sourceImage release];
     [_panRecognizer release];
     [_rotationRecognizer release];
@@ -40,13 +48,6 @@
     [super dealloc];
 }
 
-- (void)setSourceImage:(UIImage *)sourceImage
-{
-    if(_sourceImage) {
-        [_sourceImage release];
-    }
-    _sourceImage = [[self transformImageToUpOrientation:sourceImage] retain];
-}
 
 
 #pragma mark View Lifecycle
@@ -55,10 +56,28 @@
 {
     [super viewDidLoad];
     self.sourceImage = [self transformImageToUpOrientation:self.sourceImage];
+    if(self.cropWidth == 0 || self.cropHeight == 0) {
+        self.cropWidth = kDefaultCropWidth;
+        self.cropHeight = kDefaultCropHeight;
+    }
     
-    self.cropView.cropRect = CROP_RECT;
     
+    CGRect cropRect = CGRectMake((self.frameView.bounds.size.width-self.cropWidth)/2,
+                                 (self.frameView.bounds.size.height-self.cropHeight)/2,
+                                 self.cropWidth, self.cropHeight);
+    
+    
+    ImageEditorCropView *cropView = [[ImageEditorCropView alloc] initWithFrame:self.frameView.bounds];
+    cropView.cropRect = cropRect;
+    UIImageView *imageView = [[UIImageView alloc] init];
+    [self.frameView addSubview:imageView];
+    self.imageView = imageView;
+    [imageView release];
+    [self.frameView addSubview:cropView];
+    self.cropView = cropView;
+    [cropView release];
     [self reset:nil];
+    
     [self.view setMultipleTouchEnabled:YES];
     
     _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
@@ -82,6 +101,7 @@
     [self setPanRecognizer:nil];
     [self setRotationRecognizer:nil];
     [self setPinchRecognizer:nil];
+    [self setFrameView:nil];
     [self setImageView:nil];
     [self setCropView:nil];
     [super viewDidUnload];
@@ -97,7 +117,7 @@
 {
     self.imageView.transform = CGAffineTransformIdentity;
     self.imageView.image  = self.sourceImage;
-    self.imageView.frame = CROP_RECT;
+    self.imageView.frame = self.cropView.cropRect;
     
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
     CGFloat w = self.imageView.frame.size.width;
@@ -174,10 +194,12 @@
     self.imageView.transform = CGAffineTransformTranslate(self.imageView.transform, -deltaX, -deltaY);
                                                           
      recognizer.rotation = 0;
+
 }
 
 - (IBAction)handlePinch:(UIPinchGestureRecognizer *)recognizer
 {
+    
     if(recognizer.state == UIGestureRecognizerStateBegan){
         self.scaleCenter = self.touchCenter;
     }
@@ -190,6 +212,7 @@
     self.imageView.transform = CGAffineTransformTranslate(self.imageView.transform, -deltaX, -deltaY);
 
     recognizer.scale = 1;
+     
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
@@ -208,7 +231,8 @@
         case UIImageOrientationUp: {
             rotation = 0;
             sourceSize = source.size;
-            
+
+            return source;
         } break;
         case UIImageOrientationDown: {
             rotation = M_PI;
@@ -244,7 +268,7 @@
                        source.CGImage);
     
     CGImageRef resultRef = CGBitmapContextCreateImage(context);
-    UIImage *result = [UIImage imageWithCGImage:resultRef];
+    UIImage *result = [UIImage imageWithCGImage:resultRef scale:1.0 orientation:UIImageOrientationUp];
     
     CGContextRelease(context);
     CGImageRelease(resultRef);
@@ -254,42 +278,46 @@
 
 - (UIImage *)transformSourceImage
 {
-    CGSize sourceSize = self.sourceImage.size;
     UIImage* source = self.sourceImage;
     CGAffineTransform transform = self.imageView.transform;
-    
-    CGSize cropSize = CGSizeMake(source.size.width, source.size.width);
+    CGFloat aspect = self.cropView.cropRect.size.height/self.cropView.cropRect.size.width;
+    CGFloat outputWidth = self.outputWidth ? self.outputWidth : self.sourceImage.size.width;
+    CGSize outputSize = CGSizeMake(outputWidth, outputWidth*aspect);
     
     CGContextRef context = CGBitmapContextCreate(NULL,
-                                                 cropSize.width,
-                                                 cropSize.height,
+                                                 outputSize.width,
+                                                 outputSize.height,
                                                  CGImageGetBitsPerComponent(source.CGImage),
                                                  0,
                                                  CGImageGetColorSpace(source.CGImage),
                                                  CGImageGetBitmapInfo(source.CGImage));
     CGContextSetFillColorWithColor(context,  [[UIColor clearColor] CGColor]);
-    CGContextFillRect(context, CGRectMake(0, 0, cropSize.width, cropSize.height));
-    CGSize uiSize = self.imageView.bounds.size;
-    CGAffineTransform uiCoords = CGAffineTransformMakeScale(sourceSize.width/uiSize.width, sourceSize.height/uiSize.height);
-    uiCoords = CGAffineTransformTranslate(uiCoords, uiSize.width/2.0, uiSize.width/2.0);
+    CGContextFillRect(context, CGRectMake(0, 0, outputSize.width, outputSize.height));
+    
+    CGSize imageViewSize = self.imageView.bounds.size;
+    CGSize cropRectSize  = self.cropView.cropRect.size;
+
+    CGAffineTransform uiCoords = CGAffineTransformMakeScale(outputSize.width/cropRectSize.width,
+                                                            outputSize.height/cropRectSize.height);
+    uiCoords = CGAffineTransformTranslate(uiCoords, cropRectSize.width/2.0, cropRectSize.height/2.0);
     uiCoords = CGAffineTransformScale(uiCoords, 1.0, -1.0);
     CGContextConcatCTM(context, uiCoords);
     
     CGContextConcatCTM(context, transform);
     CGContextScaleCTM(context, 1.0, -1.0);
     
-    CGContextDrawImage(context, CGRectMake(-uiSize.width/2.0,
-                                           -uiSize.height/2.0,
-                                           uiSize.width,
-                                           uiSize.height)
+    CGContextDrawImage(context, CGRectMake(-imageViewSize.width/2.0,
+                                           -imageViewSize.height/2.0,
+                                           imageViewSize.width,
+                                           imageViewSize.height)
                        ,source.CGImage);
     
     CGImageRef resultRef = CGBitmapContextCreateImage(context);
-    UIImage *result = [UIImage imageWithCGImage:resultRef];
+    UIImage *result = [UIImage imageWithCGImage:resultRef scale:1.0 orientation:UIImageOrientationUp];
     
     CGContextRelease(context);
     CGImageRelease(resultRef);
-    
+
     return result;
 }
 

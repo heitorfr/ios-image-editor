@@ -39,11 +39,16 @@
     UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
     ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] initWithNibName:nil bundle:nil];
     imageEditor.sourceImage = image;
+    /*
+    imageEditor.cropWidth = 320;
+    imageEditor.cropHeight = 190;
+    imageEditor.outputWidth = 640;
+     */
     imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {
             ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
             [library writeImageToSavedPhotosAlbum:[editedImage CGImage]
-                                      orientation:(ALAssetOrientation)[image imageOrientation]
+                                      orientation:editedImage.imageOrientation
                                   completionBlock:^(NSURL *assetURL, NSError *error){
                                       if (error) {
                                           UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error Saving"
