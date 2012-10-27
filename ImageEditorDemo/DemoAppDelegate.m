@@ -37,7 +37,7 @@
 -(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
-    ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] initWithNibName:nil bundle:nil];
+    ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
     imageEditor.sourceImage = image;
     /*
     imageEditor.cropWidth = 320;
