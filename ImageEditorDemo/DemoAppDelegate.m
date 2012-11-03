@@ -2,6 +2,12 @@
 #import "DemoAppDelegate.h"
 #import "ImageEditorViewController.h"
 
+@interface DemoAppDelegate()
+@property(nonatomic,retain) UIImagePickerController *imagePicker;
+@property(nonatomic,retain) ImageEditorViewController *imageEditor;
+
+@end
+
 @implementation DemoAppDelegate
 
 - (void)dealloc
@@ -14,36 +20,20 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
-    [self showImagePicker];
-    [self.window makeKeyAndVisible];
-    return YES;
-}
+    
+    //if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+    
+    picker.allowsEditing = NO;
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    picker.delegate = self;
+    //picker.navigationBar.hidden = YES;
+    self.window.rootViewController = picker;
+    [picker release];
 
-- (void)showImagePicker
-{
-    if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
-        UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-        
-        picker.allowsEditing = NO;
-        picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-        picker.delegate = self;
-        //picker.navigationBar.hidden = YES;
-        self.window.rootViewController = picker;
-        [picker release];
-    }
-
-}
-
--(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
-{
-    UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    
     ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
-    imageEditor.sourceImage = image;
-    /*
-    imageEditor.cropWidth = 320;
-    imageEditor.cropHeight = 190;
-    imageEditor.outputWidth = 640;
-     */
+    imageEditor.cropSize = CGSizeMake(320, 320);
     imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {
             ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
@@ -58,16 +48,30 @@
                                                                                 otherButtonTitles: nil];
                                           [alert show];
                                           [alert release];
-                                      } 
-            }];
+                                      }
+                                  }];
             [library release];
         }
         [picker popToRootViewControllerAnimated:YES];
         [picker setNavigationBarHidden:NO animated:YES];
     };
-    [picker setNavigationBarHidden:YES animated:NO];
-    [picker pushViewController:imageEditor animated:YES];
+    self.imageEditor = imageEditor;
     [imageEditor release];
+
+
+    [self.window makeKeyAndVisible];
+    return YES;
+}
+
+
+-(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    self.imageEditor.sourceImage = image;
+    [self.imageEditor reset:nil];
+
+    //[picker setNavigationBarHidden:YES animated:NO];
+    [picker pushViewController:self.imageEditor animated:YES];
 }
 
 - (void) imagePickerControllerDidCancel:(UIImagePickerController *)picker

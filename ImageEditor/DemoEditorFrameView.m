@@ -1,7 +1,7 @@
-#import "ImageEditorCropView.h"
+#import "DemoEditorFrameView.h"
 #import "QuartzCore/QuartzCore.h"
 
-@implementation ImageEditorCropView
+@implementation DemoEditorFrameView
 
 @synthesize cropRect = _cropRect;
 

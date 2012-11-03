@@ -2,8 +2,7 @@
 
 @interface ImageEditorViewController ()
 @property (nonatomic,retain) UIImageView *imageView;
-@property (nonatomic,retain) ImageEditorCropView *cropView;
-
+@property (nonatomic,assign) CGRect cropRect;
 @property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
 @property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
 @property (retain, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
@@ -20,12 +19,10 @@ static const CGFloat kDefaultCropHeight = 320;
 
 @synthesize doneCallback = _doneCallback;
 @synthesize sourceImage = _sourceImage;
-@synthesize cropWidth = _cropWidth;
-@synthesize cropHeight = _cropHeight;
+@synthesize cropSize = _cropSize;
 @synthesize outputWidth = _outputWidth;
 @synthesize frameView = _frameView;
 @synthesize imageView = _imageView;
-@synthesize cropView = _cropView;
 @synthesize panRecognizer = _panRecognizer;
 @synthesize rotationRecognizer = _rotationRecognizer;
 @synthesize pinchRecognizer = _pinchRecognizer;
@@ -38,7 +35,6 @@ static const CGFloat kDefaultCropHeight = 320;
 {
 
     [_imageView release];
-    [_cropView release];
     [_frameView release];
     [_doneCallback release];
     [_sourceImage release];
@@ -48,6 +44,18 @@ static const CGFloat kDefaultCropHeight = 320;
     [super dealloc];
 }
 
+- (void)setCropSize:(CGSize)cropSize
+{
+    _cropSize = cropSize;
+}
+
+- (CGSize)cropSize
+{
+    if(_cropSize.width == 0 || _cropSize.height == 0) {
+        _cropSize = CGSizeMake(kDefaultCropWidth, kDefaultCropHeight);
+    }
+    return _cropSize;
+}
 
 
 #pragma mark View Lifecycle
@@ -55,27 +63,16 @@ static const CGFloat kDefaultCropHeight = 320;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.sourceImage = [self transformImageToUpOrientation:self.sourceImage];
-    if(self.cropWidth == 0 || self.cropHeight == 0) {
-        self.cropWidth = kDefaultCropWidth;
-        self.cropHeight = kDefaultCropHeight;
-    }
     
+    self.cropRect = CGRectMake((self.frameView.bounds.size.width-self.cropSize.width)/2,
+                                 (self.frameView.bounds.size.height-self.cropSize.height)/2,
+                                 self.cropSize.width, self.cropSize.height);
     
-    CGRect cropRect = CGRectMake((self.frameView.bounds.size.width-self.cropWidth)/2,
-                                 (self.frameView.bounds.size.height-self.cropHeight)/2,
-                                 self.cropWidth, self.cropHeight);
-    
-    
-    ImageEditorCropView *cropView = [[ImageEditorCropView alloc] initWithFrame:self.frameView.bounds];
-    cropView.cropRect = cropRect;
+    self.frameView.cropRect = self.cropRect;
     UIImageView *imageView = [[UIImageView alloc] init];
-    [self.frameView addSubview:imageView];
+    [self.view insertSubview:imageView belowSubview:self.frameView];
     self.imageView = imageView;
     [imageView release];
-    [self.frameView addSubview:cropView];
-    self.cropView = cropView;
-    [cropView release];
     [self reset:nil];
     
     [self.view setMultipleTouchEnabled:YES];
@@ -86,13 +83,13 @@ static const CGFloat kDefaultCropHeight = 320;
 
     self.panRecognizer.cancelsTouchesInView = NO;
     self.panRecognizer.delegate = self;
-    [self.cropView addGestureRecognizer:self.panRecognizer];
+    [self.frameView addGestureRecognizer:self.panRecognizer];
     self.rotationRecognizer.cancelsTouchesInView = NO;
     self.rotationRecognizer.delegate = self;
-    [self.cropView addGestureRecognizer:self.rotationRecognizer];
+    [self.frameView addGestureRecognizer:self.rotationRecognizer];
     self.pinchRecognizer.cancelsTouchesInView = NO;
     self.pinchRecognizer.delegate = self;
-    [self.cropView addGestureRecognizer:self.pinchRecognizer];
+    [self.frameView addGestureRecognizer:self.pinchRecognizer];
 }
 
 
@@ -103,7 +100,6 @@ static const CGFloat kDefaultCropHeight = 320;
     [self setPinchRecognizer:nil];
     [self setFrameView:nil];
     [self setImageView:nil];
-    [self setCropView:nil];
     [super viewDidUnload];
 }
 
@@ -117,7 +113,7 @@ static const CGFloat kDefaultCropHeight = 320;
 {
     self.imageView.transform = CGAffineTransformIdentity;
     self.imageView.image  = self.sourceImage;
-    self.imageView.frame = self.cropView.cropRect;
+    self.imageView.frame = self.cropRect;
     
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
     CGFloat w = self.imageView.frame.size.width;
@@ -177,7 +173,7 @@ static const CGFloat kDefaultCropHeight = 320;
 {
     CGPoint translation = [recognizer translationInView:self.imageView];
     self.imageView.transform = CGAffineTransformTranslate(self.imageView.transform, translation.x, translation.y);
-    [recognizer setTranslation:CGPointMake(0, 0) inView:self.cropView];
+    [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
 }
 
 - (IBAction)handleRotation:(UIRotationGestureRecognizer*)recognizer
@@ -278,9 +274,9 @@ static const CGFloat kDefaultCropHeight = 320;
 
 - (UIImage *)transformSourceImage
 {
-    UIImage* source = self.sourceImage;
+    UIImage* source  = [self transformImageToUpOrientation:self.sourceImage];
     CGAffineTransform transform = self.imageView.transform;
-    CGFloat aspect = self.cropView.cropRect.size.height/self.cropView.cropRect.size.width;
+    CGFloat aspect = self.cropRect.size.height/self.cropRect.size.width;
     CGFloat outputWidth = self.outputWidth ? self.outputWidth : self.sourceImage.size.width;
     CGSize outputSize = CGSizeMake(outputWidth, outputWidth*aspect);
     
@@ -295,7 +291,7 @@ static const CGFloat kDefaultCropHeight = 320;
     CGContextFillRect(context, CGRectMake(0, 0, outputSize.width, outputSize.height));
     
     CGSize imageViewSize = self.imageView.bounds.size;
-    CGSize cropRectSize  = self.cropView.cropRect.size;
+    CGSize cropRectSize  = self.cropRect.size;
 
     CGAffineTransform uiCoords = CGAffineTransformMakeScale(outputSize.width/cropRectSize.width,
                                                             outputSize.height/cropRectSize.height);

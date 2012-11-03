@@ -1,5 +1,9 @@
 #import <UIKit/UIKit.h>
-#import "ImageEditorCropView.h"
+
+@protocol ImageEditorFrameView
+@required
+@property(nonatomic,assign) CGRect cropRect;
+@end
 
 @class  ImageEditorViewController;
 
@@ -9,11 +13,10 @@ typedef void(^ImageEditorDoneCallback)(UIImage *image, BOOL canceled);
 
 @property(nonatomic,copy) ImageEditorDoneCallback doneCallback;
 @property(nonatomic,copy) UIImage *sourceImage;
-@property(nonatomic,assign) CGFloat cropWidth;
-@property(nonatomic,assign) CGFloat cropHeight;
+@property(nonatomic,assign) CGSize cropSize;
 @property(nonatomic,assign) CGFloat outputWidth;
 
-@property (nonatomic,retain) IBOutlet UIView *frameView;
+@property (nonatomic,retain) IBOutlet UIView<ImageEditorFrameView> *frameView;
 
 - (IBAction)done:(id)sender;
 - (IBAction)reset:(id)sender;
