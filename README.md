@@ -1,7 +1,7 @@
 iOS Image Editor
 ================
 
-An alternative to croping images with UIImagePickerController.
+A iOS View Controller to crop images. An alternative to the UIImagePickerController editor with extended features.
 
 #### Features
 
@@ -15,8 +15,7 @@ An alternative to croping images with UIImagePickerController.
 <pre><code>ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
 
 imageEditor.sourceImage = image;
-imageEditor.cropWidth = 320; // default 320
-imageEditor.cropHeight = 190; // default 320
+imageEditor.cropSize = CGSizeMake(320,320); // default 320
 imageEditor.outputWidth = 640; // default: source width
 imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
     ...
@@ -25,4 +24,16 @@ imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
 
 #### Interface
 
-You can create your own xib for the user interface. Set ImageEditorViewController as the file owner. Set the frameView outlet (where cropping takes place) and the done, reset and cancel actions.
+You can create your own xib for a custom user interface.
+ 
+* Set ImageEditorViewController (or subclass) as the file owner
+* Set the frameView outlet. This view must implement the ImageEditorFrameView protocol. It must be transparent in the crop area, the image will show behind
+* Set the done, reset and cancel actions.
+
+The demo app also shows how extended controlls can be implemented: three buttons are used for square, portrait and landscape crop.
+
+
+#### To Do
+
+* There is some image flicker whith large images in the demo app's navigation controller. ImageEditorViewController has to resize the image  in UIImageView if needed.
+* Process image in background

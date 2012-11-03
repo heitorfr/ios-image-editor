@@ -1,10 +1,10 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "DemoAppDelegate.h"
-#import "ImageEditorViewController.h"
+#import "DemoImageEditor.h"
 
 @interface DemoAppDelegate()
 @property(nonatomic,retain) UIImagePickerController *imagePicker;
-@property(nonatomic,retain) ImageEditorViewController *imageEditor;
+@property(nonatomic,retain) DemoImageEditor *imageEditor;
 
 @end
 
@@ -27,12 +27,11 @@
     picker.allowsEditing = NO;
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     picker.delegate = self;
-    //picker.navigationBar.hidden = YES;
     self.window.rootViewController = picker;
     [picker release];
 
     
-    ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
+    DemoImageEditor *imageEditor = [[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
     imageEditor.cropSize = CGSizeMake(320, 320);
     imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {
@@ -54,6 +53,7 @@
         }
         [picker popToRootViewControllerAnimated:YES];
         [picker setNavigationBarHidden:NO animated:YES];
+       // [picker dismissModalViewControllerAnimated:YES];
     };
     self.imageEditor = imageEditor;
     [imageEditor release];
@@ -70,8 +70,9 @@
     self.imageEditor.sourceImage = image;
     [self.imageEditor reset:nil];
 
-    //[picker setNavigationBarHidden:YES animated:NO];
     [picker pushViewController:self.imageEditor animated:YES];
+    [picker setNavigationBarHidden:YES animated:NO];
+    //[picker presentModalViewController:self.imageEditor animated:YES];
 }
 
 - (void) imagePickerControllerDidCancel:(UIImagePickerController *)picker

@@ -47,6 +47,7 @@ static const CGFloat kDefaultCropHeight = 320;
 - (void)setCropSize:(CGSize)cropSize
 {
     _cropSize = cropSize;
+    [self updateCropRect];
 }
 
 - (CGSize)cropSize
@@ -57,6 +58,15 @@ static const CGFloat kDefaultCropHeight = 320;
     return _cropSize;
 }
 
+- (void)updateCropRect
+{
+    self.cropRect = CGRectMake((self.frameView.bounds.size.width-self.cropSize.width)/2,
+                               (self.frameView.bounds.size.height-self.cropSize.height)/2,
+                               self.cropSize.width, self.cropSize.height);
+    
+    self.frameView.cropRect = self.cropRect;
+}
+
 
 #pragma mark View Lifecycle
 
@@ -64,11 +74,7 @@ static const CGFloat kDefaultCropHeight = 320;
 {
     [super viewDidLoad];
     
-    self.cropRect = CGRectMake((self.frameView.bounds.size.width-self.cropSize.width)/2,
-                                 (self.frameView.bounds.size.height-self.cropSize.height)/2,
-                                 self.cropSize.width, self.cropSize.height);
-    
-    self.frameView.cropRect = self.cropRect;
+    [self updateCropRect];
     UIImageView *imageView = [[UIImageView alloc] init];
     [self.view insertSubview:imageView belowSubview:self.frameView];
     self.imageView = imageView;
