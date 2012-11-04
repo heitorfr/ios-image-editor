@@ -2,6 +2,7 @@
 
 @interface ImageEditorViewController ()
 @property (nonatomic,retain) UIImageView *imageView;
+@property (nonatomic,retain) UIImage *uiImage;
 @property (nonatomic,assign) CGRect cropRect;
 @property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
 @property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
@@ -12,6 +13,7 @@
 @property(nonatomic,assign) CGPoint scaleCenter;
 @end
 
+static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
 
@@ -19,6 +21,7 @@ static const CGFloat kDefaultCropHeight = 320;
 
 @synthesize doneCallback = _doneCallback;
 @synthesize sourceImage = _sourceImage;
+@synthesize uiImage = _uiImage;
 @synthesize cropSize = _cropSize;
 @synthesize outputWidth = _outputWidth;
 @synthesize frameView = _frameView;
@@ -36,6 +39,7 @@ static const CGFloat kDefaultCropHeight = 320;
 
     [_imageView release];
     [_frameView release];
+    [_uiImage release];
     [_doneCallback release];
     [_sourceImage release];
     [_panRecognizer release];
@@ -56,6 +60,31 @@ static const CGFloat kDefaultCropHeight = 320;
         _cropSize = CGSizeMake(kDefaultCropWidth, kDefaultCropHeight);
     }
     return _cropSize;
+}
+
+
+- (void)setSourceImage:(UIImage *)sourceImage
+{
+    if(_sourceImage != sourceImage) {
+        [_sourceImage release];
+        _sourceImage = [sourceImage retain];
+        
+        CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
+        if(aspect >= 1.0) { //square or portrait
+            if(self.sourceImage.size.height > kMaxUIImageSize) {
+                self.uiImage = [self scaleImage:self.sourceImage toSize:CGSizeMake(1024*aspect,1024)];
+            } else {
+                self.uiImage = self.sourceImage;
+            }
+        } else { // landscape
+            if(self.sourceImage.size.width > kMaxUIImageSize) {
+                self.uiImage = [self scaleImage:self.sourceImage toSize:CGSizeMake(1024,1024*aspect)];
+            } else {
+                self.uiImage = self.sourceImage;
+            }
+        }
+        
+    }
 }
 
 - (void)updateCropRect
@@ -118,7 +147,7 @@ static const CGFloat kDefaultCropHeight = 320;
 - (IBAction)reset:(id)sender
 {
     self.imageView.transform = CGAffineTransformIdentity;
-    self.imageView.image  = self.sourceImage;
+    self.imageView.image  = self.uiImage;
     self.imageView.frame = self.cropRect;
     
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
@@ -222,6 +251,15 @@ static const CGFloat kDefaultCropHeight = 320;
 }
 
 # pragma mark Image Transformation
+
+-(UIImage*)scaleImage:(UIImage*)source toSize:(CGSize)size
+{
+    UIGraphicsBeginImageContext(size);
+    [source drawInRect:CGRectMake(0, 0, size.width, size.height)];
+    UIImage* scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return scaledImage;
+}
 
 - (UIImage *)transformImageToUpOrientation:(UIImage *)source;
 {
