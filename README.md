@@ -31,9 +31,3 @@ You can create your own xib for a custom user interface.
 * Set the done, reset and cancel actions.
 
 The demo app also shows how extended controlls can be implemented: three buttons are used for square, portrait and landscape crop.
-
-
-#### To Do
-
-* There is some image flicker whith large images in the demo app's navigation controller. ImageEditorViewController has to resize the image  in UIImageView if needed.
-* Process image in background
