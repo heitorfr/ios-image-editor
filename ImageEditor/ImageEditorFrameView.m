@@ -1,12 +1,12 @@
-#import "DemoEditorFrameView.h"
+#import "ImageEditorFrameView.h"
 #import "QuartzCore/QuartzCore.h"
 
 
-@interface DemoEditorFrameView ()
+@interface ImageEditorFrameView ()
 @property (nonatomic,retain) UIImageView *imageView;
 @end
 
-@implementation DemoEditorFrameView
+@implementation ImageEditorFrameView
 
 @synthesize cropRect = _cropRect;
 @synthesize imageView  = _imageView;

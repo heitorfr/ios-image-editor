@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "ImageEditorViewController.h"
 
-@interface DemoEditorFrameView : UIView<ImageEditorFrameView>
+@interface ImageEditorFrameView : UIView<ImageEditorFrame>
 
 @end

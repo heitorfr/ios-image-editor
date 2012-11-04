@@ -27,7 +27,7 @@ imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
 You can create your own xib for a custom user interface.
  
 * Set ImageEditorViewController (or subclass) as the file owner
-* Set the frameView outlet. This view must implement the ImageEditorFrameView protocol. It must be transparent in the crop area, the image will show behind
+* Set the frameView outlet. This view must implement the ImageEditorFrame protocol. It must be transparent in the crop area, the image will show behind. A default implementation ImageEditorFrameView is provided
 * Set the done, reset and cancel actions.
 
 The demo app also shows how extended controlls can be implemented: three buttons are used for square, portrait and landscape crop.
