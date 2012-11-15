@@ -69,10 +69,10 @@
     NSURL *assetURL = [info objectForKey:UIImagePickerControllerReferenceURL];
 
     [self.library assetForURL:assetURL resultBlock:^(ALAsset *asset) {
-        UIImage *thumbnail = [UIImage imageWithCGImage:[asset aspectRatioThumbnail]];
+        UIImage *preview = [UIImage imageWithCGImage:[asset aspectRatioThumbnail]];
 
         self.imageEditor.sourceImage = image;
-        //self.imageEditor.previewImage = thumbnail;
+        self.imageEditor.previewImage = preview;
         [self.imageEditor reset:nil];
         
         [picker pushViewController:self.imageEditor animated:YES];

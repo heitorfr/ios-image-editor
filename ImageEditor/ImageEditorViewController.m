@@ -2,7 +2,6 @@
 
 @interface ImageEditorViewController ()
 @property (nonatomic,retain) UIImageView *imageView;
-@property (nonatomic,retain) UIImage *uiImage;
 @property (nonatomic,assign) CGRect cropRect;
 @property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
 @property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
@@ -23,7 +22,6 @@ static const CGFloat kDefaultCropHeight = 320;
 @synthesize doneCallback = _doneCallback;
 @synthesize sourceImage = _sourceImage;
 @synthesize previewImage = _previewImage;
-@synthesize uiImage = _uiImage;
 @synthesize cropSize = _cropSize;
 @synthesize outputWidth = _outputWidth;
 @synthesize frameView = _frameView;
@@ -41,7 +39,6 @@ static const CGFloat kDefaultCropHeight = 320;
 
     [_imageView release];
     [_frameView release];
-    [_uiImage release];
     [_doneCallback release];
     [_sourceImage release];
     [_previewImage release];
@@ -76,15 +73,22 @@ static const CGFloat kDefaultCropHeight = 320;
             } else { // landscape
                 size = CGSizeMake(kPreviewImageSize,kPreviewImageSize*aspect);
             }
-            _previewImage = [self scaleImage:self.sourceImage  toSize:size withQuality:kCGInterpolationLow];
+            _previewImage = [[self scaleImage:self.sourceImage  toSize:size withQuality:kCGInterpolationLow] retain];
         } else {
-            _previewImage = _sourceImage;
+            _previewImage = [_sourceImage retain];
         }
     }
     return  _previewImage;
 }
 
-
+- (void)setSourceImage:(UIImage *)sourceImage
+{
+    if(sourceImage != _sourceImage) {
+        [_sourceImage release];
+        _sourceImage = [sourceImage retain];
+        self.previewImage = nil;
+    }
+}
 
 
 - (void)updateCropRect
@@ -145,8 +149,7 @@ static const CGFloat kDefaultCropHeight = 320;
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    self.uiImage = self.previewImage;
-    self.imageView.image = self.uiImage;
+    self.imageView.image = self.previewImage;
     
     if(self.previewImage != self.sourceImage) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -161,9 +164,7 @@ static const CGFloat kDefaultCropHeight = 320;
             hiresCGImage = [self scaleImage:self.sourceImage.CGImage withOrientation:self.sourceImage.imageOrientation toSize:size withQuality:kCGInterpolationDefault];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                NSLog(@"Done");
-                self.uiImage = [UIImage imageWithCGImage:hiresCGImage scale:1.0 orientation:UIImageOrientationUp];
-                self.imageView.image = self.uiImage;
+                self.imageView.image = [UIImage imageWithCGImage:hiresCGImage scale:1.0 orientation:UIImageOrientationUp];
                 CGImageRelease(hiresCGImage);
             });
         });
@@ -174,15 +175,12 @@ static const CGFloat kDefaultCropHeight = 320;
 - (IBAction)reset:(id)sender
 {
     self.imageView.transform = CGAffineTransformIdentity;
-    self.imageView.image  = self.uiImage;
     self.imageView.frame = self.cropRect;
     
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
     CGFloat w = self.imageView.frame.size.width;
     CGFloat h = aspect * w;
     self.imageView.frame = CGRectMake(self.imageView.center.x - w/2, self.imageView.center.y - h/2,w,h);
-    NSLog(@"Image view frame: %@", NSStringFromCGRect(self.imageView.frame));
-
 }
 
 
