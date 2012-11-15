@@ -3,17 +3,20 @@
 #import "DemoImageEditor.h"
 
 @interface DemoAppDelegate()
-@property(nonatomic,retain) UIImagePickerController *imagePicker;
 @property(nonatomic,retain) DemoImageEditor *imageEditor;
-
+@property(nonatomic,retain) ALAssetsLibrary *library;
 @end
 
 @implementation DemoAppDelegate
 
+@synthesize library = _library;
+@synthesize imageEditor = _imageEditor;
+
 - (void)dealloc
 {
+    [_library release];
+    [_imageEditor release];
     [_window release];
-    [_viewController release];
     [super dealloc];
 }
 
@@ -29,14 +32,15 @@
     picker.delegate = self;
     self.window.rootViewController = picker;
     [picker release];
-
     
-    DemoImageEditor *imageEditor = [[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
-    imageEditor.cropSize = CGSizeMake(320, 320);
-    imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
+    self.library = [[[ALAssetsLibrary alloc] init] autorelease];
+    self.imageEditor = [[[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil] autorelease];
+    
+    self.imageEditor.cropSize = CGSizeMake(320, 320);
+    self.imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {
-            ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
-            [library writeImageToSavedPhotosAlbum:[editedImage CGImage]
+          
+            [self.library writeImageToSavedPhotosAlbum:[editedImage CGImage]
                                       orientation:editedImage.imageOrientation
                                   completionBlock:^(NSURL *assetURL, NSError *error){
                                       if (error) {
@@ -49,15 +53,10 @@
                                           [alert release];
                                       }
                                   }];
-            [library release];
         }
         [picker popToRootViewControllerAnimated:YES];
         [picker setNavigationBarHidden:NO animated:YES];
-       // [picker dismissModalViewControllerAnimated:YES];
     };
-    self.imageEditor = imageEditor;
-    [imageEditor release];
-
 
     [self.window makeKeyAndVisible];
     return YES;
@@ -66,13 +65,22 @@
 
 -(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
-    self.imageEditor.sourceImage = image;
-    [self.imageEditor reset:nil];
+    UIImage *image =  [info objectForKey:UIImagePickerControllerOriginalImage];
+    NSURL *assetURL = [info objectForKey:UIImagePickerControllerReferenceURL];
 
-    [picker pushViewController:self.imageEditor animated:YES];
-    [picker setNavigationBarHidden:YES animated:NO];
-    //[picker presentModalViewController:self.imageEditor animated:YES];
+    [self.library assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+        UIImage *thumbnail = [UIImage imageWithCGImage:[asset aspectRatioThumbnail]];
+
+        self.imageEditor.sourceImage = image;
+        //self.imageEditor.previewImage = thumbnail;
+        [self.imageEditor reset:nil];
+        
+        [picker pushViewController:self.imageEditor animated:YES];
+        [picker setNavigationBarHidden:YES animated:NO];
+        
+    } failureBlock:^(NSError *error) {
+        NSLog(@"Failed to get asset from library");
+    }];
 }
 
 - (void) imagePickerControllerDidCancel:(UIImagePickerController *)picker

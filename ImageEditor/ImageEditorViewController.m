@@ -14,6 +14,7 @@
 @end
 
 static const CGFloat kMaxUIImageSize = 1024;
+static const CGFloat kPreviewImageSize = 120;
 static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
 
@@ -21,6 +22,7 @@ static const CGFloat kDefaultCropHeight = 320;
 
 @synthesize doneCallback = _doneCallback;
 @synthesize sourceImage = _sourceImage;
+@synthesize previewImage = _previewImage;
 @synthesize uiImage = _uiImage;
 @synthesize cropSize = _cropSize;
 @synthesize outputWidth = _outputWidth;
@@ -42,6 +44,7 @@ static const CGFloat kDefaultCropHeight = 320;
     [_uiImage release];
     [_doneCallback release];
     [_sourceImage release];
+    [_previewImage release];
     [_panRecognizer release];
     [_rotationRecognizer release];
     [_pinchRecognizer release];
@@ -62,30 +65,27 @@ static const CGFloat kDefaultCropHeight = 320;
     return _cropSize;
 }
 
-
-- (void)setSourceImage:(UIImage *)sourceImage
+- (UIImage *)previewImage
 {
-    if(_sourceImage != sourceImage) {
-        [_sourceImage release];
-        _sourceImage = [sourceImage retain];
-        
-        CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
-        if(aspect >= 1.0) { //square or portrait
-            if(self.sourceImage.size.height > kMaxUIImageSize) {
-                self.uiImage = [self scaleImage:self.sourceImage toSize:CGSizeMake(1024*aspect,1024)];
-            } else {
-                self.uiImage = self.sourceImage;
+    if(_previewImage == nil && _sourceImage != nil) {
+        if(self.sourceImage.size.height > kMaxUIImageSize || self.sourceImage.size.width > kMaxUIImageSize) {
+            CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
+            CGSize size;
+            if(aspect >= 1.0) { //square or portrait
+                size = CGSizeMake(kPreviewImageSize,kPreviewImageSize*aspect);
+            } else { // landscape
+                size = CGSizeMake(kPreviewImageSize,kPreviewImageSize*aspect);
             }
-        } else { // landscape
-            if(self.sourceImage.size.width > kMaxUIImageSize) {
-                self.uiImage = [self scaleImage:self.sourceImage toSize:CGSizeMake(1024,1024*aspect)];
-            } else {
-                self.uiImage = self.sourceImage;
-            }
+            _previewImage = [self scaleImage:self.sourceImage  toSize:size withQuality:kCGInterpolationLow];
+        } else {
+            _previewImage = _sourceImage;
         }
-        
     }
+    return  _previewImage;
 }
+
+
+
 
 - (void)updateCropRect
 {
@@ -143,6 +143,33 @@ static const CGFloat kDefaultCropHeight = 320;
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    self.uiImage = self.previewImage;
+    self.imageView.image = self.uiImage;
+    
+    if(self.previewImage != self.sourceImage) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            CGImageRef hiresCGImage = NULL;
+            CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
+            CGSize size;
+            if(aspect >= 1.0) { //square or portrait
+                size = CGSizeMake(kMaxUIImageSize*aspect,kMaxUIImageSize);
+            } else { // landscape
+                size = CGSizeMake(kMaxUIImageSize,kMaxUIImageSize*aspect);
+            }
+            hiresCGImage = [self scaleImage:self.sourceImage.CGImage withOrientation:self.sourceImage.imageOrientation toSize:size withQuality:kCGInterpolationDefault];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"Done");
+                self.uiImage = [UIImage imageWithCGImage:hiresCGImage scale:1.0 orientation:UIImageOrientationUp];
+                self.imageView.image = self.uiImage;
+                CGImageRelease(hiresCGImage);
+            });
+        });
+    }
+}
+
 #pragma mark Action
 - (IBAction)reset:(id)sender
 {
@@ -154,6 +181,8 @@ static const CGFloat kDefaultCropHeight = 320;
     CGFloat w = self.imageView.frame.size.width;
     CGFloat h = aspect * w;
     self.imageView.frame = CGRectMake(self.imageView.center.x - w/2, self.imageView.center.y - h/2,w,h);
+    NSLog(@"Image view frame: %@", NSStringFromCGRect(self.imageView.frame));
+
 }
 
 
@@ -252,73 +281,72 @@ static const CGFloat kDefaultCropHeight = 320;
 
 # pragma mark Image Transformation
 
--(UIImage*)scaleImage:(UIImage*)source toSize:(CGSize)size
+
+- (UIImage *)scaleImage:(UIImage *)source toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
 {
-    UIGraphicsBeginImageContext(size);
-    [source drawInRect:CGRectMake(0, 0, size.width, size.height)];
-    UIImage* scaledImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return scaledImage;
+    CGImageRef cgImage  = [self scaleImage:source.CGImage withOrientation:source.imageOrientation toSize:size withQuality:quality];
+    UIImage * result = [UIImage imageWithCGImage:cgImage scale:1.0 orientation:UIImageOrientationUp];
+    CGImageRelease(cgImage);
+    return result;
 }
 
-- (UIImage *)transformImageToUpOrientation:(UIImage *)source;
+
+- (CGImageRef)scaleImage:(CGImageRef)source withOrientation:(UIImageOrientation)orientation toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
 {
-    CGSize sourceSize =CGSizeZero;
+    CGSize srcSize = size;
     CGFloat rotation = 0.0;
     
-    switch(source.imageOrientation)
+    switch(orientation)
     {
         case UIImageOrientationUp: {
             rotation = 0;
-            sourceSize = source.size;
-
-            return source;
         } break;
         case UIImageOrientationDown: {
             rotation = M_PI;
-            sourceSize = source.size;
         } break;
         case UIImageOrientationLeft:{
             rotation = M_PI_2;
-            sourceSize = CGSizeMake(source.size.height, source.size.width);
+            srcSize = CGSizeMake(size.height, size.width);
         } break;
         case UIImageOrientationRight: {
             rotation = -M_PI_2;
-            sourceSize = CGSizeMake(source.size.height, source.size.width);
+            srcSize = CGSizeMake(size.height, size.width);
         } break;
         default:
             break;
     }
     
     CGContextRef context = CGBitmapContextCreate(NULL,
-                                                 source.size.width,
-                                                 source.size.height,
-                                                 CGImageGetBitsPerComponent(source.CGImage),
+                                                 size.width,
+                                                 size.height,
+                                                 8, //CGImageGetBitsPerComponent(source),
                                                  0,
-                                                 CGImageGetColorSpace(source.CGImage),
-                                                 CGImageGetBitmapInfo(source.CGImage));
+                                                 CGImageGetColorSpace(source),
+                                                 kCGImageAlphaNoneSkipFirst//CGImageGetBitmapInfo(source)
+                                                 );
     
-    CGContextTranslateCTM(context,  source.size.width/2,  source.size.height/2);
+    CGContextSetInterpolationQuality(context, quality);
+    CGContextTranslateCTM(context,  size.width/2,  size.height/2);
     CGContextRotateCTM(context,rotation);
     
-    CGContextDrawImage(context, CGRectMake(-sourceSize.width/2 ,
-                                           -sourceSize.height/2,
-                                           sourceSize.width,
-                                           sourceSize.height),
-                       source.CGImage);
+    CGContextDrawImage(context, CGRectMake(-srcSize.width/2 ,
+                                           -srcSize.height/2,
+                                           srcSize.width,
+                                           srcSize.height),
+                       source);
     
     CGImageRef resultRef = CGBitmapContextCreateImage(context);
-    UIImage *result = [UIImage imageWithCGImage:resultRef scale:1.0 orientation:UIImageOrientationUp];
-    
     CGContextRelease(context);
-    CGImageRelease(resultRef);
-    
-    return result;
+
+    return resultRef;
 }
+
 
 - (UIImage *)transformSourceImage
 {
-    UIImage* source  = [self transformImageToUpOrientation:self.sourceImage];
+    // Tranform image to up orientation
+    UIImage* source  = [self scaleImage:self.sourceImage toSize:self.sourceImage.size withQuality:kCGInterpolationNone];
+    
     CGAffineTransform transform = self.imageView.transform;
     CGFloat aspect = self.cropRect.size.height/self.cropRect.size.width;
     CGFloat outputWidth = self.outputWidth ? self.outputWidth : self.sourceImage.size.width;

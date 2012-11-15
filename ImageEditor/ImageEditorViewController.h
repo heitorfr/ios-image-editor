@@ -13,6 +13,7 @@ typedef void(^ImageEditorDoneCallback)(UIImage *image, BOOL canceled);
 
 @property(nonatomic,copy) ImageEditorDoneCallback doneCallback;
 @property(nonatomic,copy) UIImage *sourceImage;
+@property(nonatomic,copy) UIImage *previewImage;
 @property(nonatomic,assign) CGSize cropSize;
 @property(nonatomic,assign) CGFloat outputWidth;
 
