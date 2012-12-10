@@ -190,7 +190,10 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
         self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
     };
     if(animated) {
-        [UIView animateWithDuration:kResetAnimationInterval animations:doReset];
+        self.view.userInteractionEnabled = NO;
+        [UIView animateWithDuration:kResetAnimationInterval animations:doReset completion:^(BOOL finished) {
+            self.view.userInteractionEnabled = YES;
+        }];
     } else {
         doReset();
     }
