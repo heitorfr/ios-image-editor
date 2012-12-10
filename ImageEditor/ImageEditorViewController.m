@@ -255,12 +255,10 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
                                       CGRectGetMinY(transformedBounds)+self.imageView.center.y,
                                       transformedBounds.size.width,
                                       transformedBounds.size.height);
-
-    if (CGRectIntersectsRect(CGRectInset(boundsInFrame, kBoundingBoxInset, kBoundingBoxInset), self.cropRect ) ) {
-        return true;
-    } else {
-        return false;
-    }
+    
+    CGRect testBounds = (boundsInFrame.size.width > 2*kBoundingBoxInset && boundsInFrame.size.height > 2*kBoundingBoxInset) ?
+        CGRectInset(boundsInFrame, kBoundingBoxInset, kBoundingBoxInset) : boundsInFrame;
+    return (CGRectIntersectsRect(testBounds, self.cropRect));
 }
 
 
