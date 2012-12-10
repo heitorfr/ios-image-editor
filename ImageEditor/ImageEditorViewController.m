@@ -16,6 +16,7 @@ static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
 static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
+static const CGFloat kBoundingBoxInset = 15;
 
 @implementation ImageEditorViewController
 
@@ -229,35 +230,57 @@ static const CGFloat kDefaultCropHeight = 320;
    [self handleTouches:[event allTouches]];
 }
 
+- (BOOL)validateTransform: (CGAffineTransform)transform
+{
+    CGAffineTransform t = CGAffineTransformMakeTranslation(-self.imageView.bounds.size.width/2.0, -self.imageView.bounds.size.height/2.0);
+    t = CGAffineTransformConcat(t, transform);
+    CGRect transformedBounds = CGRectApplyAffineTransform(self.imageView.bounds, t);
+    CGRect boundsInFrame = CGRectMake(CGRectGetMinX(transformedBounds)+self.imageView.center.x,
+                                      CGRectGetMinY(transformedBounds)+self.imageView.center.y,
+                                      transformedBounds.size.width,
+                                      transformedBounds.size.height);
+
+    if (CGRectIntersectsRect(CGRectInset(boundsInFrame, kBoundingBoxInset, kBoundingBoxInset), self.cropRect ) ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
     CGPoint translation = [recognizer translationInView:self.imageView];
-    self.imageView.transform = CGAffineTransformTranslate(self.imageView.transform, translation.x, translation.y);
+    CGAffineTransform transform = CGAffineTransformTranslate(self.imageView.transform, translation.x, translation.y);
+    if([self validateTransform:transform]) {
+        self.imageView.transform = transform;
+    }
     [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
 }
 
 - (IBAction)handleRotation:(UIRotationGestureRecognizer*)recognizer
 {
 
-    if(recognizer.state == UIGestureRecognizerStateBegan){
+   if(recognizer.state == UIGestureRecognizerStateBegan){
         self.rotationCenter = self.touchCenter;
     }
     CGFloat deltaX = self.rotationCenter.x-self.imageView.bounds.size.width/2;
     CGFloat deltaY = self.rotationCenter.y-self.imageView.bounds.size.height/2;
 
-    self.imageView.transform = CGAffineTransformTranslate(self.imageView.transform,deltaX,deltaY);
-    self.imageView.transform = CGAffineTransformRotate(self.imageView.transform, recognizer.rotation);
-    self.imageView.transform = CGAffineTransformTranslate(self.imageView.transform, -deltaX, -deltaY);
-                                                          
-     recognizer.rotation = 0;
+    CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform,deltaX,deltaY);
+    transform = CGAffineTransformRotate(transform, recognizer.rotation);
+    transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
+    if([self validateTransform:transform]) {
+        self.imageView.transform = transform;
+    }
+    recognizer.rotation = 0;
 
 }
 
 - (IBAction)handlePinch:(UIPinchGestureRecognizer *)recognizer
 {
-    
+
     if(recognizer.state == UIGestureRecognizerStateBegan){
         self.scaleCenter = self.touchCenter;
     }
@@ -265,9 +288,13 @@ static const CGFloat kDefaultCropHeight = 320;
     CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
     CGFloat deltaY = self.scaleCenter.y-self.imageView.bounds.size.height/2.0;
 
-    self.imageView.transform =  CGAffineTransformTranslate(self.imageView.transform, deltaX, deltaY);
-    self.imageView.transform = CGAffineTransformScale(self.imageView.transform , recognizer.scale, recognizer.scale);
-    self.imageView.transform = CGAffineTransformTranslate(self.imageView.transform, -deltaX, -deltaY);
+    CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform, deltaX, deltaY);
+    transform = CGAffineTransformScale(transform, recognizer.scale, recognizer.scale);
+    transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
+    if([self validateTransform:transform]) {
+        self.imageView.transform = transform;
+    }
+
 
     recognizer.scale = 1;
      
