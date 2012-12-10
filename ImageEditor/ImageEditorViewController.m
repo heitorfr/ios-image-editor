@@ -10,6 +10,7 @@
 @property(nonatomic,assign) CGPoint touchCenter;
 @property(nonatomic,assign) CGPoint rotationCenter;
 @property(nonatomic,assign) CGPoint scaleCenter;
+@property(nonatomic,assign) CGFloat scale;
 @end
 
 static const CGFloat kMaxUIImageSize = 1024;
@@ -34,7 +35,9 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
 @synthesize touchCenter = _touchCenter;
 @synthesize rotationCenter = _rotationCenter;
 @synthesize scaleCenter = _scaleCenter;
-
+@synthesize scale = _scale;
+@synthesize minimumScale = _minimumScale;
+@synthesize maximumScale = _maximumScale;
 
 - (void) dealloc
 {
@@ -176,9 +179,11 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
 #pragma mark Action
 -(void)doResetAnimated:(BOOL)animated
 {
+    // TODO disable interaction during animation?
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
     CGFloat w = CGRectGetWidth(self.cropRect);
     CGFloat h = aspect * w;
+    self.scale = 1;
     
     void (^doReset)(void) = ^{
         self.imageView.transform = CGAffineTransformIdentity;
@@ -246,7 +251,7 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
    [self handleTouches:[event allTouches]];
 }
 
-- (BOOL)validateTransform: (CGAffineTransform)transform
+- (BOOL)validateBounds: (CGAffineTransform)transform
 {
     CGAffineTransform t = CGAffineTransformMakeTranslation(-self.imageView.bounds.size.width/2.0, -self.imageView.bounds.size.height/2.0);
     t = CGAffineTransformConcat(t, transform);
@@ -267,7 +272,7 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
 {
     CGPoint translation = [recognizer translationInView:self.imageView];
     CGAffineTransform transform = CGAffineTransformTranslate(self.imageView.transform, translation.x, translation.y);
-    if([self validateTransform:transform]) {
+    if([self validateBounds:transform]) {
         self.imageView.transform = transform;
     }
     [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
@@ -285,7 +290,7 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
     CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform,deltaX,deltaY);
     transform = CGAffineTransformRotate(transform, recognizer.rotation);
     transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
-    if([self validateTransform:transform]) {
+    if([self validateBounds:transform]) {
         self.imageView.transform = transform;
     }
     recognizer.rotation = 0;
@@ -305,10 +310,13 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
     CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform, deltaX, deltaY);
     transform = CGAffineTransformScale(transform, recognizer.scale, recognizer.scale);
     transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
-    if([self validateTransform:transform]) {
+    
+    if(!(self.minimumScale != 0 && self.scale*recognizer.scale < self.minimumScale) &&
+       !(self.maximumScale != 0 && self.scale*recognizer.scale > self.maximumScale) &&
+       [self validateBounds:transform]) {
         self.imageView.transform = transform;
+        self.scale *= recognizer.scale;
     }
-
 
     recognizer.scale = 1;
      
