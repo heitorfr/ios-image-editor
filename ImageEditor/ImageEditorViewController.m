@@ -209,11 +209,39 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
     [self doResetAnimated:YES];
 }
 
+
 - (IBAction)done:(id)sender
 {
-    if(self.doneCallback) {
-        self.doneCallback([self transformSourceImage], NO);
-    }
+    self.view.userInteractionEnabled = NO;
+    [self startTransformHook];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        CGImageRef resultRef = [self applyTransform:self.imageView.transform
+                                        sourceImage:self.sourceImage.CGImage
+                                         sourceSize:self.sourceImage.size
+                                  sourceOrientation:self.sourceImage.imageOrientation
+                                        outputWidth:self.outputWidth ? self.outputWidth : self.sourceImage.size.width
+                                            cropSize:self.cropSize
+                                    imageViewSize:self.imageView.bounds.size];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIImage *transform =  [UIImage imageWithCGImage:resultRef scale:1.0 orientation:UIImageOrientationUp];
+            CGImageRelease(resultRef);
+            self.view.userInteractionEnabled = YES;
+            if(self.doneCallback) {
+                self.doneCallback(transform, NO);
+            }
+            [self endTransformHook];
+        });
+    });
+
+}
+
+- (void)startTransformHook
+{
+}
+
+- (void)endTransformHook
+{
 }
 
 - (IBAction)cancel:(id)sender
@@ -391,33 +419,35 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
     return resultRef;
 }
 
-
-- (UIImage *)transformSourceImage
+- (CGImageRef)applyTransform:(CGAffineTransform)transform
+                     sourceImage:(CGImageRef)sourceImage
+                    sourceSize:(CGSize)sourceSize
+           sourceOrientation:(UIImageOrientation)sourceOrientation
+                 outputWidth:(CGFloat)outputWidth
+                    cropSize:(CGSize)cropSize
+               imageViewSize:(CGSize)imageViewSize
 {
-    // Tranform image to up orientation
-    UIImage* source  = [self scaleImage:self.sourceImage toSize:self.sourceImage.size withQuality:kCGInterpolationNone];
+    CGImageRef source = [self scaleImage:sourceImage
+                         withOrientation:sourceOrientation
+                                  toSize:sourceSize
+                             withQuality:kCGInterpolationNone];
     
-    CGAffineTransform transform = self.imageView.transform;
-    CGFloat aspect = self.cropRect.size.height/self.cropRect.size.width;
-    CGFloat outputWidth = self.outputWidth ? self.outputWidth : self.sourceImage.size.width;
+    CGFloat aspect = cropSize.height/cropSize.width;
     CGSize outputSize = CGSizeMake(outputWidth, outputWidth*aspect);
     
     CGContextRef context = CGBitmapContextCreate(NULL,
                                                  outputSize.width,
                                                  outputSize.height,
-                                                 CGImageGetBitsPerComponent(source.CGImage),
+                                                 CGImageGetBitsPerComponent(source),
                                                  0,
-                                                 CGImageGetColorSpace(source.CGImage),
-                                                 CGImageGetBitmapInfo(source.CGImage));
+                                                 CGImageGetColorSpace(source),
+                                                 CGImageGetBitmapInfo(source));
     CGContextSetFillColorWithColor(context,  [[UIColor clearColor] CGColor]);
     CGContextFillRect(context, CGRectMake(0, 0, outputSize.width, outputSize.height));
     
-    CGSize imageViewSize = self.imageView.bounds.size;
-    CGSize cropRectSize  = self.cropRect.size;
-
-    CGAffineTransform uiCoords = CGAffineTransformMakeScale(outputSize.width/cropRectSize.width,
-                                                            outputSize.height/cropRectSize.height);
-    uiCoords = CGAffineTransformTranslate(uiCoords, cropRectSize.width/2.0, cropRectSize.height/2.0);
+    CGAffineTransform uiCoords = CGAffineTransformMakeScale(outputSize.width/cropSize.width,
+                                                            outputSize.height/cropSize.height);
+    uiCoords = CGAffineTransformTranslate(uiCoords, cropSize.width/2.0, cropSize.height/2.0);
     uiCoords = CGAffineTransformScale(uiCoords, 1.0, -1.0);
     CGContextConcatCTM(context, uiCoords);
     
@@ -428,15 +458,11 @@ static const NSTimeInterval kResetAnimationInterval = 0.25;
                                            -imageViewSize.height/2.0,
                                            imageViewSize.width,
                                            imageViewSize.height)
-                       ,source.CGImage);
+                       ,source);
     
     CGImageRef resultRef = CGBitmapContextCreateImage(context);
-    UIImage *result = [UIImage imageWithCGImage:resultRef scale:1.0 orientation:UIImageOrientationUp];
-    
     CGContextRelease(context);
-    CGImageRelease(resultRef);
-
-    return result;
+    return resultRef;
 }
 
 

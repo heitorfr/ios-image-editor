@@ -30,6 +30,7 @@
 		EC23EB0E15ECC5F80051EA9E /* DemoImageEditor.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = DemoImageEditor.xib; path = ../ImageEditor/DemoImageEditor.xib; sourceTree = "<group>"; };
 		EC23EB1115ECC6350051EA9E /* ImageEditorFrameView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageEditorFrameView.h; sourceTree = "<group>"; };
 		EC23EB1215ECC6350051EA9E /* ImageEditorFrameView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageEditorFrameView.m; sourceTree = "<group>"; };
+		EC89F3A21676444A0093E121 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		ECA6FB941645C8FA0090CA20 /* DemoImageEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoImageEditor.h; sourceTree = "<group>"; };
 		ECA6FB951645C8FA0090CA20 /* DemoImageEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DemoImageEditor.m; sourceTree = "<group>"; };
 		ECFB417015EE162200FA7714 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
@@ -59,6 +60,7 @@
 		EC23EADD15ECC5600051EA9E = {
 			isa = PBXGroup;
 			children = (
+				EC89F3A21676444A0093E121 /* Default-568h@2x.png */,
 				EC23EAF215ECC5610051EA9E /* ImageEditor */,
 				ECFB417A15EE28D000FA7714 /* ImageEditorDemo */,
 				EC23EAF315ECC5610051EA9E /* Supporting Files */,

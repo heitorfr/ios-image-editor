@@ -10,4 +10,6 @@
 
 @interface DemoImageEditor : ImageEditorViewController
 
+@property(nonatomic,retain) IBOutlet UIBarButtonItem *saveButton;
+
 @end

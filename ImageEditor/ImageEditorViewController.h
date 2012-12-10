@@ -27,3 +27,8 @@ typedef void(^ImageEditorDoneCallback)(UIImage *image, BOOL canceled);
 
 @end
 
+@interface ImageEditorViewController(SubclassingHooks)
+- (void)startTransformHook;
+- (void)endTransformHook;
+@end
+
