@@ -17,6 +17,7 @@ static const CGFloat kPreviewImageSize = 120;
 static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
 static const CGFloat kBoundingBoxInset = 15;
+static const NSTimeInterval kResetAnimationInterval = 0.25;
 
 @implementation ImageEditorViewController
 
@@ -173,17 +174,32 @@ static const CGFloat kBoundingBoxInset = 15;
 }
 
 #pragma mark Action
-- (IBAction)reset:(id)sender
+-(void)doResetAnimated:(BOOL)animated
 {
-    self.imageView.transform = CGAffineTransformIdentity;
-    self.imageView.frame = self.cropRect;
-    
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
-    CGFloat w = self.imageView.frame.size.width;
+    CGFloat w = CGRectGetWidth(self.cropRect);
     CGFloat h = aspect * w;
-    self.imageView.frame = CGRectMake(self.imageView.center.x - w/2, self.imageView.center.y - h/2,w,h);
+    
+    void (^doReset)(void) = ^{
+        self.imageView.transform = CGAffineTransformIdentity;
+        self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
+    };
+    if(animated) {
+        [UIView animateWithDuration:kResetAnimationInterval animations:doReset];
+    } else {
+        doReset();
+    }
 }
 
+- (IBAction)reset:(id)sender
+{
+    [self doResetAnimated:NO];
+}
+
+- (IBAction)resetAnimated:(id)sender
+{
+    [self doResetAnimated:YES];
+}
 
 - (IBAction)done:(id)sender
 {
