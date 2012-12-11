@@ -15,7 +15,7 @@
 - (void) initialize
 {
     self.opaque = NO;
-    self.layer.opacity = 0.8;
+    self.layer.opacity = 0.7;
     self.backgroundColor = [UIColor clearColor];
     UIImageView *imageView = [[UIImageView alloc] initWithFrame:self.bounds];
     [self addSubview:imageView];
