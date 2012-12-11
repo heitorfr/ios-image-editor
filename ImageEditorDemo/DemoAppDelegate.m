@@ -37,7 +37,7 @@
     self.imageEditor = [[[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil] autorelease];
     
     self.imageEditor.cropSize = CGSizeMake(320, 320);
-    self.imageEditor.minimumScale = 0.1;
+    self.imageEditor.minimumScale = 0.2;
     self.imageEditor.maximumScale = 10;
     self.imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {
