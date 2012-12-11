@@ -259,10 +259,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
 
 - (void)handleTouches:(NSSet*)touches
 {
-    //NSLog(@"Touches: %d", touches.count);
     self.touchCenter = CGPointZero;
     if(touches.count == 0) {
-        NSLog(@" To Commited");
         self.imageView.transform = self.toCommitTranform;
         return;
     } 
@@ -316,26 +314,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
     }
 }
 
-/*
-- (BOOL)validateTransform: (CGAffineTransform)transform
-{
-    if(self.isScaling && ((self.minimumScale != 0 && self.currentScale < self.minimumScale) ||
-       (self.maximumScale != 0 && self.currentScale > self.maximumScale))) return NO;
-    
-    CGAffineTransform t = CGAffineTransformMakeTranslation(-self.imageView.bounds.size.width/2.0, -self.imageView.bounds.size.height/2.0);
-    t = CGAffineTransformConcat(t, transform);
-    CGRect transformedBounds = CGRectApplyAffineTransform(self.imageView.bounds, t);
-    CGRect boundsInFrame = CGRectMake(CGRectGetMinX(transformedBounds)+self.imageView.center.x,
-                                      CGRectGetMinY(transformedBounds)+self.imageView.center.y,
-                                      transformedBounds.size.width,
-                                      transformedBounds.size.height);
-    
-    CGRect testBounds = (boundsInFrame.size.width > 2*kBoundingBoxInset && boundsInFrame.size.height > 2*kBoundingBoxInset) ?
-        CGRectInset(boundsInFrame, kBoundingBoxInset, kBoundingBoxInset) : boundsInFrame;
-    return (CGRectIntersectsRect(testBounds, self.cropRect));
-}
-*/
-
 - (BOOL)handleTransform:(CGAffineTransform)transform
 {
     self.imageView.transform = transform;
@@ -367,7 +345,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
 
     if(recognizer.state == UIGestureRecognizerStateBegan){
         [self beginGesture];
-    } else if(recognizer.state == UIGestureRecognizerStateEnded) {
+    } else if(recognizer.state == UIGestureRecognizerStateEnded || recognizer.state == UIGestureRecognizerStateCancelled) {
         [self endGesture];
     } else {
         CGPoint translation = [recognizer translationInView:self.imageView];
@@ -384,7 +362,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
    if(recognizer.state == UIGestureRecognizerStateBegan){
         self.rotationCenter = self.touchCenter;
         [self beginGesture];
-    } else if(recognizer.state == UIGestureRecognizerStateEnded) {
+    } else if(recognizer.state == UIGestureRecognizerStateEnded || recognizer.state == UIGestureRecognizerStateCancelled) {
         [self endGesture];
     } else {
         CGFloat deltaX = self.rotationCenter.x-self.imageView.bounds.size.width/2;
@@ -408,10 +386,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
         self.toCommitScale = self.scale;
         self.isScaling = YES;
         self.currentScale = self.scale;
-    } else if(recognizer.state == UIGestureRecognizerStateEnded) {
+    } else if(recognizer.state == UIGestureRecognizerStateEnded || recognizer.state == UIGestureRecognizerStateCancelled) {
         [self endGesture];
         self.scale = self.toCommitScale;
-        self.isScaling = NO; //TODO canceled
+        self.isScaling = NO;
     } else {
 
         CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
