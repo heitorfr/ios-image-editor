@@ -292,12 +292,36 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
 
 #pragma mark Gestures
 
-- (void)beginGesture
+- (BOOL)handleGestureState:(UIGestureRecognizerState)state
 {
-    if(self.gestureCount == 0) {
-        self.toCommitTranform = self.imageView.transform;
+    BOOL handle = YES;
+    switch (state) {
+        case UIGestureRecognizerStateBegan:
+            self.gestureCount++;
+            break;
+        case UIGestureRecognizerStateCancelled:
+        case UIGestureRecognizerStateEnded: {
+            self.gestureCount--;
+            handle = NO;
+            if(self.gestureCount == 0) {
+                CGFloat scale = self.scale;
+                if(self.minimumScale != 0 && self.scale < self.minimumScale) {
+                    scale = self.minimumScale;
+                } else if(self.maximumScale != 0 && self.scale > self.maximumScale) {
+                    scale = self.maximumScale;
+                }
+                if(scale != self.scale) {
+                    NSLog(@"Scale: %.2f Fixed: %.2f Min: %.2f Max: %.2f apply: %.2f", self.scale, scale,self.minimumScale, self.maximumScale, scale/self.scale);
+                    CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform,-self.imageView.bounds.size.width/2,-self.imageView.bounds.size.height/2);
+                    self.imageView.transform = CGAffineTransformScale(transform, scale/self.scale, scale/self.scale);
+                    self.scale = scale;
+                }
+            }
+        } break;
+        default:
+            break;
     }
-    self.gestureCount++;
+    return handle;
 }
 
 - (void)endGesture
@@ -342,49 +366,52 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
+        if([self handleGestureState:recognizer.state]) {
+        CGPoint translation = [recognizer translationInView:self.imageView];
+        CGAffineTransform transform = CGAffineTransformTranslate( self.imageView.transform, translation.x, translation.y);
+        self.imageView.transform = transform;
 
-    CGPoint translation = [recognizer translationInView:self.imageView];
-    CGAffineTransform transform = CGAffineTransformTranslate( self.imageView.transform, translation.x, translation.y);
-    self.imageView.transform = transform;
-
-    [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
+        [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
+    }
 
 }
 
 - (IBAction)handleRotation:(UIRotationGestureRecognizer*)recognizer
 {
+    if([self handleGestureState:recognizer.state]) {
+        if(recognizer.state == UIGestureRecognizerStateBegan){
+            self.rotationCenter = self.touchCenter;
+        } 
+        CGFloat deltaX = self.rotationCenter.x-self.imageView.bounds.size.width/2;
+        CGFloat deltaY = self.rotationCenter.y-self.imageView.bounds.size.height/2;
 
-   if(recognizer.state == UIGestureRecognizerStateBegan){
-        self.rotationCenter = self.touchCenter;
-    } 
-    CGFloat deltaX = self.rotationCenter.x-self.imageView.bounds.size.width/2;
-    CGFloat deltaY = self.rotationCenter.y-self.imageView.bounds.size.height/2;
+        CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform,deltaX,deltaY);
+        transform = CGAffineTransformRotate(transform, recognizer.rotation);
+        transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
+        self.imageView.transform = transform;
 
-    CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform,deltaX,deltaY);
-    transform = CGAffineTransformRotate(transform, recognizer.rotation);
-    transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
-    self.imageView.transform = transform;
-
-    recognizer.rotation = 0;
+        recognizer.rotation = 0;
+    }
 
 }
 
 - (IBAction)handlePinch:(UIPinchGestureRecognizer *)recognizer
 {
-    if(recognizer.state == UIGestureRecognizerStateBegan){
-        self.scaleCenter = self.touchCenter;
-    }
-    CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
-    CGFloat deltaY = self.scaleCenter.y-self.imageView.bounds.size.height/2.0;
+    if([self handleGestureState:recognizer.state]) {
+        if(recognizer.state == UIGestureRecognizerStateBegan){
+            self.scaleCenter = self.touchCenter;
+        }
+        CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
+        CGFloat deltaY = self.scaleCenter.y-self.imageView.bounds.size.height/2.0;
 
-    CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform, deltaX, deltaY);
-    transform = CGAffineTransformScale(transform, recognizer.scale, recognizer.scale);
-    transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
-    self.scale *= recognizer.scale;
-    self.imageView.transform = transform;
+        CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform, deltaX, deltaY);
+        transform = CGAffineTransformScale(transform, recognizer.scale, recognizer.scale);
+        transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
+        self.scale *= recognizer.scale;
+        self.imageView.transform = transform;
 
-    recognizer.scale = 1;
-     
+        recognizer.scale = 1;
+    } 
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
