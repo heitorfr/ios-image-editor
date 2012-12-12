@@ -80,3 +80,7 @@ Create your own xib for a custom user interface.
 The demo app also shows how extended controlls can be implemented: three buttons are used for square, portrait and landscape crop.
 
 Use the subclassing hooks (<code>startTransformHook</code>, <code>endTransformHook</code>) if you need to update the interface during image processing (to diable UI controls, for instance).
+
+License
+---------
+MIT
