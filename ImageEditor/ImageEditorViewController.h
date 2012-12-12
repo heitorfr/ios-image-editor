@@ -19,6 +19,11 @@ typedef void(^ImageEditorDoneCallback)(UIImage *image, BOOL canceled);
 @property(nonatomic,assign) CGFloat minimumScale;
 @property(nonatomic,assign) CGFloat maximumScale;
 
+@property(nonatomic,assign) BOOL panEnabled;
+@property(nonatomic,assign) BOOL rotateEnabled;
+@property(nonatomic,assign) BOOL scaleEnabled;
+@property(nonatomic,assign) BOOL tapToResetEnabled;
+
 @property (nonatomic,retain) IBOutlet UIView<ImageEditorFrame> *frameView;
 
 - (IBAction)done:(id)sender;

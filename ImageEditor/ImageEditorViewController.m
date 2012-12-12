@@ -44,6 +44,24 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @synthesize maximumScale = _maximumScale;
 @synthesize gestureCount = _gestureCount;
 
+
+@dynamic panEnabled;
+@dynamic rotateEnabled;
+@dynamic scaleEnabled;
+@dynamic tapToResetEnabled;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if(self) {
+        _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+        _rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotation:)];
+        _pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
+        _tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    }
+    return self;
+}
+
 - (void) dealloc
 {
 
@@ -58,6 +76,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     [_tapRecognizer release];
     [super dealloc];
 }
+
+#pragma mark Properties
 
 - (void)setCropSize:(CGSize)cropSize
 {
@@ -112,6 +132,47 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 }
 
 
+- (void)setPanEnabled:(BOOL)panEnabled
+{
+    self.panRecognizer.enabled = panEnabled;
+}
+
+- (BOOL)panEnabled
+{
+    return self.panRecognizer.enabled;
+}
+
+- (void)setScaleEnabled:(BOOL)scaleEnabled
+{
+    self.pinchRecognizer.enabled = scaleEnabled;
+}
+
+- (BOOL)scaleEnabled
+{
+    return self.pinchRecognizer.enabled;
+}
+
+
+- (void)setRotateEnabled:(BOOL)rotateEnabled
+{
+    self.rotationRecognizer.enabled = rotateEnabled;
+}
+
+- (BOOL)rotateEnabled
+{
+    return self.rotationRecognizer.enabled;
+}
+
+- (void)setTapToResetEnabled:(BOOL)tapToResetEnabled
+{
+    self.tapRecognizer.enabled = tapToResetEnabled;
+}
+
+- (BOOL)tapToResetEnabled
+{
+    return self.tapToResetEnabled;
+}
+
 #pragma mark View Lifecycle
 
 - (void)viewDidLoad
@@ -126,11 +187,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     [self reset:nil];
     
     [self.view setMultipleTouchEnabled:YES];
-    
-    _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-    _rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotation:)];
-    _pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
-    _tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
 
     self.panRecognizer.cancelsTouchesInView = NO;
     self.panRecognizer.delegate = self;
@@ -148,13 +204,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 - (void)viewDidUnload
 {
-    [self setPanRecognizer:nil];
-    [self setRotationRecognizer:nil];
-    [self setPinchRecognizer:nil];
-    [self setTapRecognizer:nil];
+    [super viewDidUnload];
+    
     [self setFrameView:nil];
     [self setImageView:nil];
-    [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -186,7 +239,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     }
 }
 
-#pragma mark Action
+#pragma mark Actions
 -(void)doResetAnimated:(BOOL)animated
 {
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
