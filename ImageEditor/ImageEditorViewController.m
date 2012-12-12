@@ -55,6 +55,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     [_panRecognizer release];
     [_rotationRecognizer release];
     [_pinchRecognizer release];
+    [_tapRecognizer release];
     [super dealloc];
 }
 
@@ -150,6 +151,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     [self setPanRecognizer:nil];
     [self setRotationRecognizer:nil];
     [self setPinchRecognizer:nil];
+    [self setTapRecognizer:nil];
     [self setFrameView:nil];
     [self setImageView:nil];
     [super viewDidUnload];
