@@ -6,6 +6,7 @@
 @property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
 @property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
 @property (retain, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
+@property (retain, nonatomic) IBOutlet UITapGestureRecognizer *tapRecognizer;
 
 @property(nonatomic,assign) CGAffineTransform toCommitTranform;
 @property(nonatomic,assign) CGFloat currentScale;
@@ -24,7 +25,7 @@ static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
 static const CGFloat kBoundingBoxInset = 15;
 static const NSTimeInterval kAnimationIntervalReset = 0.25;
-static const NSTimeInterval kAnimationIntervalTransform = 0.1;
+static const NSTimeInterval kAnimationIntervalTransform = 0.25;
 
 @implementation ImageEditorViewController
 
@@ -37,6 +38,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
 @synthesize imageView = _imageView;
 @synthesize panRecognizer = _panRecognizer;
 @synthesize rotationRecognizer = _rotationRecognizer;
+@synthesize tapRecognizer = _tapRecognizer;
 @synthesize pinchRecognizer = _pinchRecognizer;
 @synthesize touchCenter = _touchCenter;
 @synthesize rotationCenter = _rotationCenter;
@@ -135,6 +137,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
     _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
     _rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotation:)];
     _pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
+    _tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
 
     self.panRecognizer.cancelsTouchesInView = NO;
     self.panRecognizer.delegate = self;
@@ -145,6 +148,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
     self.pinchRecognizer.cancelsTouchesInView = NO;
     self.pinchRecognizer.delegate = self;
     [self.frameView addGestureRecognizer:self.pinchRecognizer];
+    self.tapRecognizer.numberOfTapsRequired = 2;
+    [self.frameView addGestureRecognizer:self.tapRecognizer];
 }
 
 
@@ -304,6 +309,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
             self.gestureCount--;
             handle = NO;
             if(self.gestureCount == 0) {
+                NSLog(@"checking scale");
                 CGFloat scale = self.scale;
                 if(self.minimumScale != 0 && self.scale < self.minimumScale) {
                     scale = self.minimumScale;
@@ -311,10 +317,20 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
                     scale = self.maximumScale;
                 }
                 if(scale != self.scale) {
-                    NSLog(@"Scale: %.2f Fixed: %.2f Min: %.2f Max: %.2f apply: %.2f", self.scale, scale,self.minimumScale, self.maximumScale, scale/self.scale);
-                    CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform,-self.imageView.bounds.size.width/2,-self.imageView.bounds.size.height/2);
-                    self.imageView.transform = CGAffineTransformScale(transform, scale/self.scale, scale/self.scale);
-                    self.scale = scale;
+                    CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
+                    CGFloat deltaY = self.scaleCenter.y-self.imageView.bounds.size.height/2.0;
+                    
+                    CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform, deltaX, deltaY);
+                    transform = CGAffineTransformScale(transform, scale/self.scale , scale/self.scale);
+                    transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
+                    self.view.userInteractionEnabled = NO;
+                    [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationCurveEaseOut animations:^{
+                        self.imageView.transform = transform;            
+                    } completion:^(BOOL finished) {
+                        self.view.userInteractionEnabled = YES;
+                        self.scale = scale;
+                    }];
+                    
                 }
             }
         } break;
@@ -336,32 +352,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
             self.view.userInteractionEnabled = YES;
         }];
     }
-}
-
-- (BOOL)handleTransform:(CGAffineTransform)transform
-{
-    self.imageView.transform = transform;
-    BOOL valid = NO;
-    if(self.isScaling && ((self.minimumScale != 0 && self.currentScale < self.minimumScale) ||
-                          (self.maximumScale != 0 && self.currentScale > self.maximumScale))) {
-        valid = NO;
-    } else {
-        CGAffineTransform t = CGAffineTransformMakeTranslation(-self.imageView.bounds.size.width/2.0, -self.imageView.bounds.size.height/2.0);
-        t = CGAffineTransformConcat(t, transform);
-        CGRect transformedBounds = CGRectApplyAffineTransform(self.imageView.bounds, t);
-        CGRect boundsInFrame = CGRectMake(CGRectGetMinX(transformedBounds)+self.imageView.center.x,
-                                          CGRectGetMinY(transformedBounds)+self.imageView.center.y,
-                                          transformedBounds.size.width,
-                                          transformedBounds.size.height);
-        
-        CGRect testBounds = (boundsInFrame.size.width > 2*kBoundingBoxInset && boundsInFrame.size.height > 2*kBoundingBoxInset) ?
-        CGRectInset(boundsInFrame, kBoundingBoxInset, kBoundingBoxInset) : boundsInFrame;
-        valid = (CGRectIntersectsRect(testBounds, self.cropRect));
-    }
-    if(valid) {
-        self.toCommitTranform = transform;
-    }
-    return valid;
 }
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
@@ -400,7 +390,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
     if([self handleGestureState:recognizer.state]) {
         if(recognizer.state == UIGestureRecognizerStateBegan){
             self.scaleCenter = self.touchCenter;
-        }
+            self.isScaling = YES;
+        } 
         CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
         CGFloat deltaY = self.scaleCenter.y-self.imageView.bounds.size.height/2.0;
 
@@ -411,7 +402,13 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.1;
         self.imageView.transform = transform;
 
         recognizer.scale = 1;
-    } 
+    } else {
+        self.isScaling = NO;
+    }
+}
+
+- (IBAction)handleTap:(UITapGestureRecognizer *)recogniser {
+    [self resetAnimated:nil];
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
