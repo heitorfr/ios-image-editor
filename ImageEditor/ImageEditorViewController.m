@@ -8,10 +8,6 @@
 @property (retain, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
 @property (retain, nonatomic) IBOutlet UITapGestureRecognizer *tapRecognizer;
 
-@property(nonatomic,assign) CGAffineTransform toCommitTranform;
-@property(nonatomic,assign) CGFloat currentScale;
-@property(nonatomic,assign) CGFloat toCommitScale;
-@property(nonatomic,assign) BOOL isScaling;
 @property(nonatomic,assign) NSUInteger gestureCount;
 @property(nonatomic,assign) CGPoint touchCenter;
 @property(nonatomic,assign) CGPoint rotationCenter;
@@ -25,7 +21,7 @@ static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
 static const CGFloat kBoundingBoxInset = 15;
 static const NSTimeInterval kAnimationIntervalReset = 0.25;
-static const NSTimeInterval kAnimationIntervalTransform = 0.25;
+static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 @implementation ImageEditorViewController
 
@@ -46,10 +42,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
 @synthesize scale = _scale;
 @synthesize minimumScale = _minimumScale;
 @synthesize maximumScale = _maximumScale;
-@synthesize toCommitTranform = _toCommitTranform;
-@synthesize currentScale = _currentScale;
-@synthesize toCommitScale = _toCommitScale;
-@synthesize isScaling = _isScaling;
 @synthesize gestureCount = _gestureCount;
 
 - (void) dealloc
@@ -91,7 +83,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
             } else { // landscape
                 size = CGSizeMake(kPreviewImageSize,kPreviewImageSize*aspect);
             }
-            _previewImage = [[self scaleImage:self.sourceImage  toSize:size withQuality:kCGInterpolationLow] retain];
+            _previewImage = [[self scaledImage:self.sourceImage  toSize:size withQuality:kCGInterpolationLow] retain];
         } else {
             _previewImage = [_sourceImage retain];
         }
@@ -182,7 +174,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
             } else { // landscape
                 size = CGSizeMake(kMaxUIImageSize,kMaxUIImageSize*aspect);
             }
-            hiresCGImage = [self scaleImage:self.sourceImage.CGImage withOrientation:self.sourceImage.imageOrientation toSize:size withQuality:kCGInterpolationDefault];
+            hiresCGImage = [self newScaledImage:self.sourceImage.CGImage withOrientation:self.sourceImage.imageOrientation toSize:size withQuality:kCGInterpolationDefault];
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.imageView.image = [UIImage imageWithCGImage:hiresCGImage scale:1.0 orientation:UIImageOrientationUp];
@@ -195,7 +187,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
 #pragma mark Action
 -(void)doResetAnimated:(BOOL)animated
 {
-    // TODO disable interaction during animation?
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
     CGFloat w = CGRectGetWidth(self.cropRect);
     CGFloat h = aspect * w;
@@ -232,7 +223,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
     [self startTransformHook];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        CGImageRef resultRef = [self applyTransform:self.imageView.transform
+        CGImageRef resultRef = [self newTransformedImage:self.imageView.transform
                                         sourceImage:self.sourceImage.CGImage
                                          sourceSize:self.sourceImage.size
                                   sourceOrientation:self.sourceImage.imageOrientation
@@ -265,10 +256,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
 - (void)handleTouches:(NSSet*)touches
 {
     self.touchCenter = CGPointZero;
-    if(touches.count == 0) {
-        self.imageView.transform = self.toCommitTranform;
-        return;
-    } 
     if(touches.count < 2) return;
     
     [touches enumerateObjectsUsingBlock:^(id obj, BOOL *stop) {
@@ -309,7 +296,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
             self.gestureCount--;
             handle = NO;
             if(self.gestureCount == 0) {
-                NSLog(@"checking scale");
                 CGFloat scale = self.scale;
                 if(self.minimumScale != 0 && self.scale < self.minimumScale) {
                     scale = self.minimumScale;
@@ -340,19 +326,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
     return handle;
 }
 
-- (void)endGesture
-{
-    self.gestureCount--;
-    if(self.gestureCount == 0) {
-        self.view.userInteractionEnabled = NO;
-        [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationCurveEaseOut animations:^{
-            self.imageView.transform = self.toCommitTranform;
-
-        } completion:^(BOOL finished) {
-            self.view.userInteractionEnabled = YES;
-        }];
-    }
-}
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
@@ -390,7 +363,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
     if([self handleGestureState:recognizer.state]) {
         if(recognizer.state == UIGestureRecognizerStateBegan){
             self.scaleCenter = self.touchCenter;
-            self.isScaling = YES;
         } 
         CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
         CGFloat deltaY = self.scaleCenter.y-self.imageView.bounds.size.height/2.0;
@@ -402,8 +374,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
         self.imageView.transform = transform;
 
         recognizer.scale = 1;
-    } else {
-        self.isScaling = NO;
     }
 }
 
@@ -418,16 +388,16 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
 # pragma mark Image Transformation
 
 
-- (UIImage *)scaleImage:(UIImage *)source toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
+- (UIImage *)scaledImage:(UIImage *)source toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
 {
-    CGImageRef cgImage  = [self scaleImage:source.CGImage withOrientation:source.imageOrientation toSize:size withQuality:quality];
+    CGImageRef cgImage  = [self newScaledImage:source.CGImage withOrientation:source.imageOrientation toSize:size withQuality:quality];
     UIImage * result = [UIImage imageWithCGImage:cgImage scale:1.0 orientation:UIImageOrientationUp];
     CGImageRelease(cgImage);
     return result;
 }
 
 
-- (CGImageRef)scaleImage:(CGImageRef)source withOrientation:(UIImageOrientation)orientation toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
+- (CGImageRef)newScaledImage:(CGImageRef)source withOrientation:(UIImageOrientation)orientation toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
 {
     CGSize srcSize = size;
     CGFloat rotation = 0.0;
@@ -477,7 +447,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
     return resultRef;
 }
 
-- (CGImageRef)applyTransform:(CGAffineTransform)transform
+- (CGImageRef)newTransformedImage:(CGAffineTransform)transform
                      sourceImage:(CGImageRef)sourceImage
                     sourceSize:(CGSize)sourceSize
            sourceOrientation:(UIImageOrientation)sourceOrientation
@@ -485,7 +455,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
                     cropSize:(CGSize)cropSize
                imageViewSize:(CGSize)imageViewSize
 {
-    CGImageRef source = [self scaleImage:sourceImage
+    CGImageRef source = [self newScaledImage:sourceImage
                          withOrientation:sourceOrientation
                                   toSize:sourceSize
                              withQuality:kCGInterpolationNone];
@@ -520,6 +490,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
     
     CGImageRef resultRef = CGBitmapContextCreateImage(context);
     CGContextRelease(context);
+    CGImageRelease(source);
     return resultRef;
 }
 
