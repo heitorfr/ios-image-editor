@@ -74,7 +74,7 @@ Interface
 Create your own xib for a custom user interface.
  
 * Set <code>ImageEditorViewController</code> (or subclass) as the file owner
-* Set the <code>frameView</code> outlet. This view must implement the <code>ImageEditorFrame</code> protocol. It must be transparent in the crop area, the image will show behind. A default implementation ImageEditorFrameView is provided
+* Set the <code>frameView</code> outlet. This view must implement the <code>ImageEditorFrame</code> protocol. It must be transparent in the crop area, the image will show behind. A default implementation <code>ImageEditorFrameView</code> is provided
 * Connect interface elements to the available actions: <code>done</code>, <code>reset</code>, <code>resetAnimated</code> and <code>cancel</code>.
 
 The demo app also shows how extended controlls can be implemented: three buttons are used for square, portrait and landscape crop.
