@@ -16,6 +16,17 @@
 
 @synthesize  saveButton = _saveButton;
 
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if(self) {
+        self.cropSize = CGSizeMake(320,320);
+        self.minimumScale = 0.2;
+        self.maximumScale = 10;
+    }
+    return self;
+}
+
 - (void)dealloc
 {
     [_saveButton release];

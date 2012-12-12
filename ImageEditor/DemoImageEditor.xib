@@ -69,11 +69,11 @@
 								<int key="IBUIStyle">1</int>
 								<reference key="IBUIToolbar" ref="279608225"/>
 							</object>
-							<object class="IBUIBarButtonItem" id="147508387">
-								<string key="IBUITitle">Reset</string>
+							<object class="IBUIBarButtonItem" id="309587407">
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<int key="IBUIStyle">1</int>
+								<float key="IBUIWidth">31</float>
 								<reference key="IBUIToolbar" ref="279608225"/>
+								<int key="IBUISystemItemIdentifier">6</int>
 							</object>
 							<object class="IBUIBarButtonItem" id="939729913">
 								<string key="IBUITitle">S</string>
@@ -92,6 +92,12 @@
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<int key="IBUIStyle">1</int>
 								<reference key="IBUIToolbar" ref="279608225"/>
+							</object>
+							<object class="IBUIBarButtonItem" id="396973483">
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<float key="IBUIWidth">31</float>
+								<reference key="IBUIToolbar" ref="279608225"/>
+								<int key="IBUISystemItemIdentifier">6</int>
 							</object>
 							<object class="IBUIBarButtonItem" id="271558334">
 								<string key="IBUITitle">Save</string>
@@ -157,14 +163,6 @@
 						<reference key="destination" ref="372490531"/>
 					</object>
 					<int key="connectionID">35</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">resetAnimated:</string>
-						<reference key="source" ref="147508387"/>
-						<reference key="destination" ref="372490531"/>
-					</object>
-					<int key="connectionID">58</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
@@ -239,11 +237,12 @@
 						<reference key="object" ref="279608225"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="271558334"/>
-							<reference ref="147508387"/>
 							<reference ref="900874481"/>
 							<reference ref="939729913"/>
 							<reference ref="833913955"/>
 							<reference ref="259751116"/>
+							<reference ref="309587407"/>
+							<reference ref="396973483"/>
 						</array>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -268,13 +267,18 @@
 						<reference key="parent" ref="279608225"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">33</int>
-						<reference key="object" ref="147508387"/>
+						<int key="objectID">31</int>
+						<reference key="object" ref="271558334"/>
 						<reference key="parent" ref="279608225"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">31</int>
-						<reference key="object" ref="271558334"/>
+						<int key="objectID">60</int>
+						<reference key="object" ref="309587407"/>
+						<reference key="parent" ref="279608225"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">61</int>
+						<reference key="object" ref="396973483"/>
 						<reference key="parent" ref="279608225"/>
 					</object>
 				</array>
@@ -289,17 +293,18 @@
 				<string key="31.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="32.CustomClassName">ImageEditorFrameView</string>
 				<string key="32.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<string key="33.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="48.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="52.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="53.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="54.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="60.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="61.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 			</dictionary>
 			<dictionary class="NSMutableDictionary" key="unlocalizedProperties"/>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">59</int>
+			<int key="maxID">61</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -358,6 +363,7 @@
 						<string key="handlePan:">UIPanGestureRecognizer</string>
 						<string key="handlePinch:">UIPinchGestureRecognizer</string>
 						<string key="handleRotation:">UIRotationGestureRecognizer</string>
+						<string key="handleTap:">UITapGestureRecognizer</string>
 						<string key="reset:">id</string>
 						<string key="resetAnimated:">id</string>
 					</dictionary>
@@ -382,6 +388,10 @@
 							<string key="name">handleRotation:</string>
 							<string key="candidateClassName">UIRotationGestureRecognizer</string>
 						</object>
+						<object class="IBActionInfo" key="handleTap:">
+							<string key="name">handleTap:</string>
+							<string key="candidateClassName">UITapGestureRecognizer</string>
+						</object>
 						<object class="IBActionInfo" key="reset:">
 							<string key="name">reset:</string>
 							<string key="candidateClassName">id</string>
@@ -396,6 +406,7 @@
 						<string key="panRecognizer">UIPanGestureRecognizer</string>
 						<string key="pinchRecognizer">UIPinchGestureRecognizer</string>
 						<string key="rotationRecognizer">UIRotationGestureRecognizer</string>
+						<string key="tapRecognizer">UITapGestureRecognizer</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<object class="IBToOneOutletInfo" key="frameView">
@@ -413,6 +424,10 @@
 						<object class="IBToOneOutletInfo" key="rotationRecognizer">
 							<string key="name">rotationRecognizer</string>
 							<string key="candidateClassName">UIRotationGestureRecognizer</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="tapRecognizer">
+							<string key="name">tapRecognizer</string>
+							<string key="candidateClassName">UITapGestureRecognizer</string>
 						</object>
 					</dictionary>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
