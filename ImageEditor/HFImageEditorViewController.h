@@ -1,17 +1,17 @@
 #import <UIKit/UIKit.h>
 
-@protocol ImageEditorFrame
+@protocol HFImageEditorFrame
 @required
 @property(nonatomic,assign) CGRect cropRect;
 @end
 
-@class  ImageEditorViewController;
+@class  HFImageEditorViewController;
 
-typedef void(^ImageEditorDoneCallback)(UIImage *image, BOOL canceled);
+typedef void(^HFImageEditorDoneCallback)(UIImage *image, BOOL canceled);
 
-@interface ImageEditorViewController : UIViewController<UIGestureRecognizerDelegate>
+@interface HFImageEditorViewController : UIViewController<UIGestureRecognizerDelegate>
 
-@property(nonatomic,copy) ImageEditorDoneCallback doneCallback;
+@property(nonatomic,copy) HFImageEditorDoneCallback doneCallback;
 @property(nonatomic,copy) UIImage *sourceImage;
 @property(nonatomic,copy) UIImage *previewImage;
 @property(nonatomic,assign) CGSize cropSize;
@@ -24,16 +24,8 @@ typedef void(^ImageEditorDoneCallback)(UIImage *image, BOOL canceled);
 @property(nonatomic,assign) BOOL scaleEnabled;
 @property(nonatomic,assign) BOOL tapToResetEnabled;
 
-@property (nonatomic,retain) IBOutlet UIView<ImageEditorFrame> *frameView;
-
-- (IBAction)done:(id)sender;
-- (IBAction)reset:(id)sender;
-- (IBAction)cancel:(id)sender;
+- (void)reset:(BOOL)animated;
 
 @end
 
-@interface ImageEditorViewController(SubclassingHooks)
-- (void)startTransformHook;
-- (void)endTransformHook;
-@end
 

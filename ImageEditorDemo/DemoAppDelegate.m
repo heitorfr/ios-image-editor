@@ -72,7 +72,7 @@
 
         self.imageEditor.sourceImage = image;
         self.imageEditor.previewImage = preview;
-        [self.imageEditor reset:nil];
+        [self.imageEditor reset:NO];
         
         [picker pushViewController:self.imageEditor animated:YES];
         [picker setNavigationBarHidden:YES animated:NO];
