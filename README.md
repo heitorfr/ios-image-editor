@@ -17,7 +17,7 @@ Features
 Usage
 -----
 
-<pre><code>ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
+<pre><code>HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
 
 imageEditor.sourceImage = image;
 imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
@@ -43,7 +43,7 @@ NSURL *assetURL = [info objectForKey:UIImagePickerControllerReferenceURL];
 
 [self.library assetForURL:assetURL resultBlock:^(ALAsset *asset) {
     UIImage *preview = [UIImage imageWithCGImage:[asset aspectRatioThumbnail]];
-ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] 
+HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc] 
 	initWithNibName:@"DemoImageEditor" bundle:nil];
     self.imageEditor.sourceImage = image;
     self.imageEditor.previewImage = preview;        
@@ -73,8 +73,8 @@ Interface
 ---------
 Create your own xib for a custom user interface.
  
-* Set <code>ImageEditorViewController</code> (or subclass) as the file owner
-* Set the <code>frameView</code> outlet. This view must implement the <code>ImageEditorFrame</code> protocol. It must be transparent in the crop area, the image will show behind. A default implementation <code>ImageEditorFrameView</code> is provided
+* Set <code>HFImageEditorViewController</code> (or subclass) as the file owner
+* Set the <code>frameView</code> outlet. This view must implement the <code>HFImageEditorFrame</code> protocol. It must be transparent in the crop area, the image will show behind. A default implementation ImageEditorFrameView is provided
 * Connect interface elements to the available actions: <code>done</code>, <code>reset</code>, <code>resetAnimated</code> and <code>cancel</code>.
 
 The demo app also shows how extended controlls can be implemented: three buttons are used for square, portrait and landscape crop.

@@ -1,11 +1,4 @@
-//
-//  DemoImageEditorViewController.m
-//  ImageEditor
-//
-//  Created by Heitor Ferreira on 03/11/12.
-//  Copyright (c) 2012 Heitor Ferreira. All rights reserved.
-//
-
+#import "HFImageEditorViewController+SubclassingHooks.h"
 #import "DemoImageEditor.h"
 
 @interface DemoImageEditor ()
@@ -39,18 +32,18 @@
     self.saveButton = nil;
 }
 
-- (IBAction)setSquare:(id)sender
+- (IBAction)setSquareAction:(id)sender
 {
     self.cropSize = CGSizeMake(320, 320);
 }
 
-- (IBAction)setLandscape:(id)sender
+- (IBAction)setLandscapeAction:(id)sender
 {
     self.cropSize = CGSizeMake(320, 240);
 }
 
 
-- (IBAction)setLPortrait:(id)sender
+- (IBAction)setLPortraitAction:(id)sender
 {
     self.cropSize = CGSizeMake(240, 320);
 }
