@@ -1,19 +1,4 @@
-#import "ImageEditorViewController.h"
-
-@interface ImageEditorViewController ()
-@property (nonatomic,retain) UIImageView *imageView;
-@property (nonatomic,assign) CGRect cropRect;
-@property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
-@property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
-@property (retain, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
-@property (retain, nonatomic) IBOutlet UITapGestureRecognizer *tapRecognizer;
-
-@property(nonatomic,assign) NSUInteger gestureCount;
-@property(nonatomic,assign) CGPoint touchCenter;
-@property(nonatomic,assign) CGPoint rotationCenter;
-@property(nonatomic,assign) CGPoint scaleCenter;
-@property(nonatomic,assign) CGFloat scale;
-@end
+#import "HFImageEditorViewController.h"
 
 static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
@@ -23,7 +8,27 @@ static const CGFloat kBoundingBoxInset = 15;
 static const NSTimeInterval kAnimationIntervalReset = 0.25;
 static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
-@implementation ImageEditorViewController
+@interface HFImageEditorViewController ()
+@property (nonatomic,retain) UIImageView *imageView;
+@property (nonatomic,assign) CGRect cropRect;
+@property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
+@property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
+@property (retain, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
+@property (retain, nonatomic) IBOutlet UITapGestureRecognizer *tapRecognizer;
+@property (nonatomic,retain) IBOutlet UIView<HFImageEditorFrame> *frameView;
+
+
+@property(nonatomic,assign) NSUInteger gestureCount;
+@property(nonatomic,assign) CGPoint touchCenter;
+@property(nonatomic,assign) CGPoint rotationCenter;
+@property(nonatomic,assign) CGPoint scaleCenter;
+@property(nonatomic,assign) CGFloat scale;
+
+@end
+
+
+
+@implementation HFImageEditorViewController
 
 @synthesize doneCallback = _doneCallback;
 @synthesize sourceImage = _sourceImage;
@@ -43,7 +48,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @synthesize minimumScale = _minimumScale;
 @synthesize maximumScale = _maximumScale;
 @synthesize gestureCount = _gestureCount;
-
 
 @dynamic panEnabled;
 @dynamic rotateEnabled;
@@ -173,6 +177,28 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return self.tapToResetEnabled;
 }
 
+#pragma mark Public methods
+-(void)reset:(BOOL)animated
+{
+    CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
+    CGFloat w = CGRectGetWidth(self.cropRect);
+    CGFloat h = aspect * w;
+    self.scale = 1;
+    
+    void (^doReset)(void) = ^{
+        self.imageView.transform = CGAffineTransformIdentity;
+        self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
+    };
+    if(animated) {
+        self.view.userInteractionEnabled = NO;
+        [UIView animateWithDuration:kAnimationIntervalReset animations:doReset completion:^(BOOL finished) {
+            self.view.userInteractionEnabled = YES;
+        }];
+    } else {
+        doReset();
+    }
+}
+
 #pragma mark View Lifecycle
 
 - (void)viewDidLoad
@@ -184,7 +210,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     [self.view insertSubview:imageView belowSubview:self.frameView];
     self.imageView = imageView;
     [imageView release];
-    [self reset:nil];
+    [self reset:NO];
     
     [self.view setMultipleTouchEnabled:YES];
 
@@ -240,39 +266,19 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 }
 
 #pragma mark Actions
--(void)doResetAnimated:(BOOL)animated
+
+- (IBAction)resetAction:(id)sender
 {
-    CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
-    CGFloat w = CGRectGetWidth(self.cropRect);
-    CGFloat h = aspect * w;
-    self.scale = 1;
-    
-    void (^doReset)(void) = ^{
-        self.imageView.transform = CGAffineTransformIdentity;
-        self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
-    };
-    if(animated) {
-        self.view.userInteractionEnabled = NO;
-        [UIView animateWithDuration:kAnimationIntervalReset animations:doReset completion:^(BOOL finished) {
-            self.view.userInteractionEnabled = YES;
-        }];
-    } else {
-        doReset();
-    }
+    [self reset:NO];
 }
 
-- (IBAction)reset:(id)sender
+- (IBAction)resetAnimatedAction:(id)sender
 {
-    [self doResetAnimated:NO];
-}
-
-- (IBAction)resetAnimated:(id)sender
-{
-    [self doResetAnimated:YES];
+    [self reset:YES];
 }
 
 
-- (IBAction)done:(id)sender
+- (IBAction)doneAction:(id)sender
 {
     self.view.userInteractionEnabled = NO;
     [self startTransformHook];
@@ -299,7 +305,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 }
 
 
-- (IBAction)cancel:(id)sender
+- (IBAction)cancelAction:(id)sender
 {
     if(self.doneCallback) {
         self.doneCallback(nil, YES);
@@ -433,7 +439,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 }
 
 - (IBAction)handleTap:(UITapGestureRecognizer *)recogniser {
-    [self resetAnimated:nil];
+    [self reset:YES];
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {

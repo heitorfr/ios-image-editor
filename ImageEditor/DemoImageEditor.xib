@@ -58,6 +58,7 @@
 						<string key="NSFrame">{{0, 416}, {320, 44}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
@@ -158,43 +159,43 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">done:</string>
+						<string key="label">doneAction:</string>
 						<reference key="source" ref="271558334"/>
 						<reference key="destination" ref="372490531"/>
 					</object>
-					<int key="connectionID">35</int>
+					<int key="connectionID">62</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">cancel:</string>
+						<string key="label">cancelAction:</string>
 						<reference key="source" ref="900874481"/>
 						<reference key="destination" ref="372490531"/>
 					</object>
-					<int key="connectionID">49</int>
+					<int key="connectionID">63</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">setSquare:</string>
+						<string key="label">setSquareAction:</string>
 						<reference key="source" ref="939729913"/>
 						<reference key="destination" ref="372490531"/>
 					</object>
-					<int key="connectionID">55</int>
+					<int key="connectionID">64</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">setLandscape:</string>
+						<string key="label">setLandscapeAction:</string>
 						<reference key="source" ref="833913955"/>
 						<reference key="destination" ref="372490531"/>
 					</object>
-					<int key="connectionID">56</int>
+					<int key="connectionID">65</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">setLPortrait:</string>
+						<string key="label">setLPortraitAction:</string>
 						<reference key="source" ref="259751116"/>
 						<reference key="destination" ref="372490531"/>
 					</object>
-					<int key="connectionID">57</int>
+					<int key="connectionID">66</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -291,7 +292,7 @@
 				<string key="1.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="30.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="31.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<string key="32.CustomClassName">ImageEditorFrameView</string>
+				<string key="32.CustomClassName">HFImageEditorFrameView</string>
 				<string key="32.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="48.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="52.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -304,29 +305,29 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">61</int>
+			<int key="maxID">66</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
 					<string key="className">DemoImageEditor</string>
-					<string key="superclassName">ImageEditorViewController</string>
+					<string key="superclassName">HFImageEditorViewController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="setLPortrait:">id</string>
-						<string key="setLandscape:">id</string>
-						<string key="setSquare:">id</string>
+						<string key="setLPortraitAction:">id</string>
+						<string key="setLandscapeAction:">id</string>
+						<string key="setSquareAction:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="setLPortrait:">
-							<string key="name">setLPortrait:</string>
+						<object class="IBActionInfo" key="setLPortraitAction:">
+							<string key="name">setLPortraitAction:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="setLandscape:">
-							<string key="name">setLandscape:</string>
+						<object class="IBActionInfo" key="setLandscapeAction:">
+							<string key="name">setLandscapeAction:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="setSquare:">
-							<string key="name">setSquare:</string>
+						<object class="IBActionInfo" key="setSquareAction:">
+							<string key="name">setSquareAction:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 					</dictionary>
@@ -347,33 +348,33 @@
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
-					<string key="className">ImageEditorFrameView</string>
+					<string key="className">HFImageEditorFrameView</string>
 					<string key="superclassName">UIView</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/ImageEditorFrameView.h</string>
+						<string key="minorKey">./Classes/HFImageEditorFrameView.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
-					<string key="className">ImageEditorViewController</string>
+					<string key="className">HFImageEditorViewController</string>
 					<string key="superclassName">UIViewController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="cancel:">id</string>
-						<string key="done:">id</string>
+						<string key="cancelAction:">id</string>
+						<string key="doneAction:">id</string>
 						<string key="handlePan:">UIPanGestureRecognizer</string>
 						<string key="handlePinch:">UIPinchGestureRecognizer</string>
 						<string key="handleRotation:">UIRotationGestureRecognizer</string>
 						<string key="handleTap:">UITapGestureRecognizer</string>
-						<string key="reset:">id</string>
-						<string key="resetAnimated:">id</string>
+						<string key="resetAction:">id</string>
+						<string key="resetAnimatedAction:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="cancel:">
-							<string key="name">cancel:</string>
+						<object class="IBActionInfo" key="cancelAction:">
+							<string key="name">cancelAction:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="done:">
-							<string key="name">done:</string>
+						<object class="IBActionInfo" key="doneAction:">
+							<string key="name">doneAction:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 						<object class="IBActionInfo" key="handlePan:">
@@ -392,12 +393,12 @@
 							<string key="name">handleTap:</string>
 							<string key="candidateClassName">UITapGestureRecognizer</string>
 						</object>
-						<object class="IBActionInfo" key="reset:">
-							<string key="name">reset:</string>
+						<object class="IBActionInfo" key="resetAction:">
+							<string key="name">resetAction:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="resetAnimated:">
-							<string key="name">resetAnimated:</string>
+						<object class="IBActionInfo" key="resetAnimatedAction:">
+							<string key="name">resetAnimatedAction:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 					</dictionary>
@@ -432,7 +433,7 @@
 					</dictionary>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/ImageEditorViewController.h</string>
+						<string key="minorKey">./Classes/HFImageEditorViewController.h</string>
 					</object>
 				</object>
 			</array>

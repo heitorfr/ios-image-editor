@@ -17,7 +17,7 @@ Features
 Usage
 -----
 
-<pre><code>ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
+<pre><code>HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
 
 imageEditor.sourceImage = image;
 imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
@@ -43,7 +43,7 @@ NSURL *assetURL = [info objectForKey:UIImagePickerControllerReferenceURL];
 
 [self.library assetForURL:assetURL resultBlock:^(ALAsset *asset) {
     UIImage *preview = [UIImage imageWithCGImage:[asset aspectRatioThumbnail]];
-ImageEditorViewController *imageEditor = [[ImageEditorViewController alloc] 
+HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc] 
 	initWithNibName:@"DemoImageEditor" bundle:nil];
     self.imageEditor.sourceImage = image;
     self.imageEditor.previewImage = preview;        
@@ -73,14 +73,22 @@ Interface
 ---------
 Create your own xib for a custom user interface.
  
-* Set <code>ImageEditorViewController</code> (or subclass) as the file owner
-* Set the <code>frameView</code> outlet. This view must implement the <code>ImageEditorFrame</code> protocol. It must be transparent in the crop area, the image will show behind. A default implementation ImageEditorFrameView is provided
+* Set <code>HFImageEditorViewController</code> (or subclass) as the file owner
+* Set the <code>frameView</code> outlet. This view must implement the <code>HFImageEditorFrame</code> protocol. It must be transparent in the crop area, the image will show behind. A default implementation ImageEditorFrameView is provided
 * Connect interface elements to the available actions: <code>done</code>, <code>reset</code>, <code>resetAnimated</code> and <code>cancel</code>.
 
 The demo app also shows how extended controlls can be implemented: three buttons are used for square, portrait and landscape crop.
 
 Use the subclassing hooks (<code>startTransformHook</code>, <code>endTransformHook</code>) if you need to update the interface during image processing (to diable UI controls, for instance).
 
-Licence
+License
 ---------
-MIT
+MIT License
+
+Copyright (c) 2012 Heitor Ferreira
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
