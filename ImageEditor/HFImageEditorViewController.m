@@ -53,6 +53,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @dynamic rotateEnabled;
 @dynamic scaleEnabled;
 @dynamic tapToResetEnabled;
+@dynamic cropBoundsInSourceImage;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -554,6 +555,18 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     CGImageRelease(source);
     return resultRef;
 }
+
+- (CGRect)cropBoundsInSourceImage
+{
+    CGAffineTransform uiCoords = CGAffineTransformMakeScale(self.sourceImage.size.width/self.imageView.bounds.size.width,
+                                                            self.sourceImage.size.height/self.imageView.bounds.size.height);
+    uiCoords = CGAffineTransformTranslate(uiCoords, self.imageView.bounds.size.width/2.0, self.imageView.bounds.size.height/2.0);
+    uiCoords = CGAffineTransformScale(uiCoords, 1.0, -1.0);
+
+    CGRect crop =  CGRectMake(-self.cropSize.width/2.0, -self.cropSize.height/2.0, self.cropSize.width, self.cropSize.height);
+    return CGRectApplyAffineTransform(crop, CGAffineTransformConcat(CGAffineTransformInvert(self.imageView.transform),uiCoords));
+}
+
 
 #pragma mark Subclass Hooks
 

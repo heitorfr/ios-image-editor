@@ -27,7 +27,7 @@ imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
 </pre></code>
 
 
-Properties
+Configuration Properties
 ----------
 
 #### sourceImage
@@ -67,6 +67,13 @@ The bounds for image scaling. If not defined, image zoom is unlimited.
 
 #### panEnabled, rotateEnabled, scaleEnabled, tapToResetEnabled
 BOOL property to enable/disable specific gestures
+
+Output Properties
+----------
+
+####cropBoundsInSourceImage
+Returns a CGRect representing the current crop rectangle in the source image coordinates. Source image coordinates have the origin at the bottom left of the image. Note that, if rotation has been applyed, then cropBoundsInSourceImage represents the bounding box of the rotated crop rectangle.
+
 
 
 Interface
