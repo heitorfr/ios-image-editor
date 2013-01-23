@@ -18,6 +18,7 @@
     self.layer.opacity = 0.7;
     self.backgroundColor = [UIColor clearColor];
     UIImageView *imageView = [[UIImageView alloc] initWithFrame:self.bounds];
+    imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self addSubview:imageView];
     self.imageView = imageView;
     [imageView release];

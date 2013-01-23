@@ -206,12 +206,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 {
     [super viewDidLoad];
     
-    [self updateCropRect];
     UIImageView *imageView = [[UIImageView alloc] init];
     [self.view insertSubview:imageView belowSubview:self.frameView];
     self.imageView = imageView;
     [imageView release];
-    [self reset:NO];
     
     [self.view setMultipleTouchEnabled:YES];
 
@@ -244,6 +242,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
+    [self updateCropRect];
+    [self reset:NO];
     self.imageView.image = self.previewImage;
     
     if(self.previewImage != self.sourceImage) {
