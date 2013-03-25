@@ -188,7 +188,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     
     void (^doReset)(void) = ^{
         self.imageView.transform = CGAffineTransformIdentity;
-        self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
+        self.imageView.frame = CGRectMake(CGRectGetMidX(self.frameView.frame) - w/2, CGRectGetMidY(self.frameView.frame) - h/2,w,h);
     };
     if(animated) {
         self.view.userInteractionEnabled = NO;
