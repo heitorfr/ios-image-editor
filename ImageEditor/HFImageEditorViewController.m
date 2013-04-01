@@ -373,7 +373,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     transform = CGAffineTransformScale(transform, scale/self.scale , scale/self.scale);
                     transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
                     self.view.userInteractionEnabled = NO;
-                    [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationCurveEaseOut animations:^{
+                    [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
                         self.imageView.transform = transform;            
                     } completion:^(BOOL finished) {
                         self.view.userInteractionEnabled = YES;
