@@ -394,19 +394,32 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     CGFloat yOffset = 0;
     CGFloat xOffset = 0;
     
-    if(self.imageView.frame.origin.x > 0){
-        xOffset =  -self.imageView.frame.origin.x;
-    } else if(self.imageView.frame.origin.x+self.imageView.frame.size.width < 320){
-        xOffset = 320-(self.imageView.frame.origin.x+self.imageView.frame.size.width);
+    if(self.imageView.frame.origin.x > self.cropRect.origin.x){
+        xOffset =  - (self.imageView.frame.origin.x - self.cropRect.origin.x);
+        CGFloat newRightX = CGRectGetMaxX(self.imageView.frame) + xOffset;
+        if(newRightX < CGRectGetMaxX(self.cropRect)) {
+            xOffset =  CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
+        }
+    } else if(CGRectGetMaxX(self.imageView.frame) < 320){
+        xOffset = CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
+        CGFloat newLeftX = self.imageView.frame.origin.x + xOffset;
+        if(newLeftX > self.cropRect.origin.x) {
+            xOffset = self.cropRect.origin.x - self.imageView.frame.origin.x;
+        }
     }
-    
     if (self.imageView.frame.origin.y > self.cropRect.origin.y) {
-        yOffset = -(self.imageView.frame.origin.y - self.cropRect.origin.y);
-    } else if((self.imageView.frame.origin.y + self.imageView.frame.size.height) <
-             (self.cropRect.origin.y + self.cropRect.size.height)){
-        yOffset = self.cropRect.origin.y + self.cropRect.size.height - (self.imageView.frame.origin.y+self.imageView.frame.size.height);
-    }
-    
+        yOffset = - (self.imageView.frame.origin.y - self.cropRect.origin.y);
+        CGFloat newBottomY = CGRectGetMaxY(self.imageView.frame) + yOffset;
+        if(newBottomY < CGRectGetMaxY(self.cropRect)) {
+            yOffset = CGRectGetMaxY(self.cropRect) - CGRectGetMaxY(self.imageView.frame);
+        }
+    } else if(CGRectGetMaxY(self.imageView.frame) < CGRectGetMaxY(self.cropRect)){
+        yOffset = CGRectGetMaxY(self.cropRect) - CGRectGetMaxY(self.imageView.frame);
+        CGFloat newTopY = self.imageView.frame.origin.y + yOffset;
+        if(newTopY > self.cropRect.origin.y) {
+            yOffset = self.cropRect.origin.y - self.imageView.frame.origin.y;
+        }
+    }   
     if(xOffset || yOffset){
         self.view.userInteractionEnabled = NO;
         CGAffineTransform transform =
