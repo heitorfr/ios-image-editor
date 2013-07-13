@@ -65,6 +65,10 @@ The width of the cropped image. If not defined, the width of the source image is
 #### minimumScale, maximumScale
 The bounds for image scaling. If not defined, image zoom is unlimited.
 
+#### checkBounds
+Set to true to bound the image scale and pan to the crop area so that you dont' get a back backround on the resulting image.
+This will work correctly only if rotation os not enabled. When rotation is enabled, the bounds will be checked against the bounding box of the rotated image.
+
 #### panEnabled, rotateEnabled, scaleEnabled, tapToResetEnabled
 BOOL property to enable/disable specific gestures
 

@@ -1,4 +1,5 @@
 #import "HFImageEditorViewController.h"
+#import <QuartzCore/QuartzCore.h>
 
 static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
@@ -178,17 +179,27 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return self.tapToResetEnabled;
 }
 
+
+
 #pragma mark Public methods
 -(void)reset:(BOOL)animated
 {
     CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
     CGFloat w = CGRectGetWidth(self.cropRect);
     CGFloat h = aspect * w;
+    
     self.scale = 1;
+    
+    
+    if(self.checkBounds) {
+        self.scale = (w > h) ? w/h : h/w;
+        self.minimumScale = self.scale;
+    }
     
     void (^doReset)(void) = ^{
         self.imageView.transform = CGAffineTransformIdentity;
         self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
+        self.imageView.transform = CGAffineTransformMakeScale(self.scale, self.scale);
     };
     if(animated) {
         self.view.userInteractionEnabled = NO;
@@ -205,6 +216,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.view.layer.masksToBounds = YES;
     
     UIImageView *imageView = [[UIImageView alloc] init];
     [self.view insertSubview:imageView belowSubview:self.frameView];
@@ -381,7 +393,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     }];
                     
                 }
-                [self fixBounds];
+                if(self.checkBounds) [self doCheckBound];
             }
         } break;
         default:
@@ -390,7 +402,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return handle;
 }
 
--(void)fixBounds{
+-(void)doCheckBound {
     CGFloat yOffset = 0;
     CGFloat xOffset = 0;
     

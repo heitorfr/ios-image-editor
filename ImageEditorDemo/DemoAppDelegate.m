@@ -35,6 +35,7 @@
     
     self.library = [[[ALAssetsLibrary alloc] init] autorelease];
     self.imageEditor = [[[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil] autorelease];
+    self.imageEditor.checkBounds = YES;
     
     self.imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {
@@ -73,6 +74,7 @@
         self.imageEditor.sourceImage = image;
         self.imageEditor.previewImage = preview;
         [self.imageEditor reset:NO];
+    
         
         [picker pushViewController:self.imageEditor animated:YES];
         [picker setNavigationBarHidden:YES animated:NO];
