@@ -381,6 +381,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     }];
                     
                 }
+                [self fixBounds];
             }
         } break;
         default:
@@ -389,10 +390,39 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return handle;
 }
 
+-(void)fixBounds{
+    CGFloat yOffset = 0;
+    CGFloat xOffset = 0;
+    
+    if(self.imageView.frame.origin.x > 0){
+        xOffset =  -self.imageView.frame.origin.x;
+    } else if(self.imageView.frame.origin.x+self.imageView.frame.size.width < 320){
+        xOffset = 320-(self.imageView.frame.origin.x+self.imageView.frame.size.width);
+    }
+    
+    if (self.imageView.frame.origin.y > self.cropRect.origin.y) {
+        yOffset = -(self.imageView.frame.origin.y - self.cropRect.origin.y);
+    } else if((self.imageView.frame.origin.y + self.imageView.frame.size.height) <
+             (self.cropRect.origin.y + self.cropRect.size.height)){
+        yOffset = self.cropRect.origin.y + self.cropRect.size.height - (self.imageView.frame.origin.y+self.imageView.frame.size.height);
+    }
+    
+    if(xOffset || yOffset){
+        self.view.userInteractionEnabled = NO;
+        CGAffineTransform transform =
+        CGAffineTransformTranslate(self.imageView.transform,
+                                   xOffset/self.scale, yOffset/self.scale);
+        [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+            self.imageView.transform = transform;
+        } completion:^(BOOL finished) {
+            self.view.userInteractionEnabled = YES;
+        }];
+    }
+}
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
-        if([self handleGestureState:recognizer.state]) {
+    if([self handleGestureState:recognizer.state]) {
         CGPoint translation = [recognizer translationInView:self.imageView];
         CGAffineTransform transform = CGAffineTransformTranslate( self.imageView.transform, translation.x, translation.y);
         self.imageView.transform = transform;
