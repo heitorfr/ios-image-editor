@@ -66,7 +66,7 @@ The width of the cropped image. If not defined, the width of the source image is
 The bounds for image scaling. If not defined, image zoom is unlimited.
 
 #### checkBounds
-Set to true to bound the image scale and pan to the crop area so that you dont' get a black backround on the resulting image.
+Set to true to bound the image scale and pan so that you dont' get a black backround on the resulting image.
 This will work correctly only if rotation os not enabled. 
 
 #### panEnabled, rotateEnabled, scaleEnabled, tapToResetEnabled
@@ -90,6 +90,15 @@ Create your own xib for a custom user interface.
 The demo app also shows how extended controlls can be implemented: three buttons are used for square, portrait and landscape crop.
 
 Use the subclassing hooks (<code>startTransformHook</code>, <code>endTransformHook</code>) if you need to update the interface during image processing (to diable UI controls, for instance).
+
+
+ChangeLog
+---------
+
+#### 1.1
+#### Features:
+
+* New <code>checkBounds</code> setting to bound the image scale and pan to avoid clear space.
 
 License
 ---------
