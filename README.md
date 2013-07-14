@@ -67,7 +67,7 @@ The bounds for image scaling. If not defined, image zoom is unlimited.
 
 #### checkBounds
 Set to true to bound the image scale and pan so that you dont' get a black backround on the resulting image.
-This will work correctly only if rotation os not enabled. 
+This will work correctly only if rotation is not enabled. 
 
 #### panEnabled, rotateEnabled, scaleEnabled, tapToResetEnabled
 BOOL property to enable/disable specific gestures
@@ -98,7 +98,7 @@ ChangeLog
 #### 1.1
 #### Features:
 
-* New <code>checkBounds</code> setting to bound the image scale and pan to avoid clear space.
+* New <code>checkBounds</code> setting to bound the image scale and pan to avoid clear space (only if rotation is not enabled).
 
 License
 ---------
