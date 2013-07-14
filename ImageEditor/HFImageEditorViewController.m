@@ -181,19 +181,24 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 
 
-#pragma mark Public methods
+#pragma mark -
 -(void)reset:(BOOL)animated
 {
-    CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
-    CGFloat w = CGRectGetWidth(self.cropRect);
-    CGFloat h = aspect * w;
+    CGFloat w = 0.0f;
+    CGFloat h = 0.0f;
+    CGFloat sourceAspect = self.sourceImage.size.height/self.sourceImage.size.width;
+    CGFloat cropAspect = self.cropRect.size.height/self.cropRect.size.width;
     
+    if(sourceAspect > cropAspect) {
+        w = CGRectGetWidth(self.cropRect);
+        h = sourceAspect * w;
+    } else {
+        h = CGRectGetHeight(self.cropRect);
+        w = h / sourceAspect;
+    }
     self.scale = 1;
-    
-    
     if(self.checkBounds) {
-        self.scale = (w > h) ? w/h : h/w;
-        self.minimumScale = self.scale;
+        self.minimumScale = 1;
     }
     
     void (^doReset)(void) = ^{
@@ -359,6 +364,17 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 #pragma mark Gestures
 
+- (CGFloat)boundedScale:(CGFloat)scale;
+{
+    CGFloat boundedScale = scale;
+    if(self.minimumScale > 0 && scale < self.minimumScale) {
+        boundedScale = self.minimumScale;
+    } else if(self.maximumScale > 0 && scale > self.maximumScale) {
+        boundedScale = self.maximumScale;
+    }
+    return boundedScale;
+}
+
 - (BOOL)handleGestureState:(UIGestureRecognizerState)state
 {
     BOOL handle = YES;
@@ -371,12 +387,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
             self.gestureCount--;
             handle = NO;
             if(self.gestureCount == 0) {
-                CGFloat scale = self.scale;
-                if(self.minimumScale != 0 && self.scale < self.minimumScale) {
-                    scale = self.minimumScale;
-                } else if(self.maximumScale != 0 && self.scale > self.maximumScale) {
-                    scale = self.maximumScale;
-                }
+                CGFloat scale = [self boundedScale:self.scale];
                 if(scale != self.scale) {
                     CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
                     CGFloat deltaY = self.scaleCenter.y-self.imageView.bounds.size.height/2.0;
@@ -393,7 +404,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     }];
                     
                 }
-                if(self.checkBounds) [self doCheckBound];
+                if(self.checkBounds) [self doCheckBounds];
             }
         } break;
         default:
@@ -402,7 +413,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return handle;
 }
 
--(void)doCheckBound {
+-(void)doCheckBounds {
     CGFloat yOffset = 0;
     CGFloat xOffset = 0;
     
@@ -412,7 +423,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         if(newRightX < CGRectGetMaxX(self.cropRect)) {
             xOffset =  CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
         }
-    } else if(CGRectGetMaxX(self.imageView.frame) < 320){
+    } else if(CGRectGetMaxX(self.imageView.frame) < CGRectGetMaxX(self.cropRect)){
         xOffset = CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
         CGFloat newLeftX = self.imageView.frame.origin.x + xOffset;
         if(newLeftX > self.cropRect.origin.x) {
