@@ -1,4 +1,5 @@
 #import "HFImageEditorViewController.h"
+#import <QuartzCore/QuartzCore.h>
 
 static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
@@ -178,17 +179,32 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return self.tapToResetEnabled;
 }
 
-#pragma mark Public methods
+
+
+#pragma mark -
 -(void)reset:(BOOL)animated
 {
-    CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
-    CGFloat w = CGRectGetWidth(self.cropRect);
-    CGFloat h = aspect * w;
+    CGFloat w = 0.0f;
+    CGFloat h = 0.0f;
+    CGFloat sourceAspect = self.sourceImage.size.height/self.sourceImage.size.width;
+    CGFloat cropAspect = self.cropRect.size.height/self.cropRect.size.width;
+    
+    if(sourceAspect > cropAspect) {
+        w = CGRectGetWidth(self.cropRect);
+        h = sourceAspect * w;
+    } else {
+        h = CGRectGetHeight(self.cropRect);
+        w = h / sourceAspect;
+    }
     self.scale = 1;
+    if(self.checkBounds) {
+        self.minimumScale = 1;
+    }
     
     void (^doReset)(void) = ^{
         self.imageView.transform = CGAffineTransformIdentity;
-        self.imageView.frame = CGRectMake(CGRectGetMidX(self.frameView.frame) - w/2, CGRectGetMidY(self.frameView.frame) - h/2,w,h);
+        self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
+        self.imageView.transform = CGAffineTransformMakeScale(self.scale, self.scale);
     };
     if(animated) {
         self.view.userInteractionEnabled = NO;
@@ -205,6 +221,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.view.layer.masksToBounds = YES;
     
     UIImageView *imageView = [[UIImageView alloc] init];
     [self.view insertSubview:imageView belowSubview:self.frameView];
@@ -347,6 +364,17 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 #pragma mark Gestures
 
+- (CGFloat)boundedScale:(CGFloat)scale;
+{
+    CGFloat boundedScale = scale;
+    if(self.minimumScale > 0 && scale < self.minimumScale) {
+        boundedScale = self.minimumScale;
+    } else if(self.maximumScale > 0 && scale > self.maximumScale) {
+        boundedScale = self.maximumScale;
+    }
+    return boundedScale;
+}
+
 - (BOOL)handleGestureState:(UIGestureRecognizerState)state
 {
     BOOL handle = YES;
@@ -359,12 +387,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
             self.gestureCount--;
             handle = NO;
             if(self.gestureCount == 0) {
-                CGFloat scale = self.scale;
-                if(self.minimumScale != 0 && self.scale < self.minimumScale) {
-                    scale = self.minimumScale;
-                } else if(self.maximumScale != 0 && self.scale > self.maximumScale) {
-                    scale = self.maximumScale;
-                }
+                CGFloat scale = [self boundedScale:self.scale];
                 if(scale != self.scale) {
                     CGFloat deltaX = self.scaleCenter.x-self.imageView.bounds.size.width/2.0;
                     CGFloat deltaY = self.scaleCenter.y-self.imageView.bounds.size.height/2.0;
@@ -381,6 +404,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     }];
                     
                 }
+                if(self.checkBounds) [self doCheckBounds];
             }
         } break;
         default:
@@ -389,10 +413,52 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return handle;
 }
 
+-(void)doCheckBounds {
+    CGFloat yOffset = 0;
+    CGFloat xOffset = 0;
+    
+    if(self.imageView.frame.origin.x > self.cropRect.origin.x){
+        xOffset =  - (self.imageView.frame.origin.x - self.cropRect.origin.x);
+        CGFloat newRightX = CGRectGetMaxX(self.imageView.frame) + xOffset;
+        if(newRightX < CGRectGetMaxX(self.cropRect)) {
+            xOffset =  CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
+        }
+    } else if(CGRectGetMaxX(self.imageView.frame) < CGRectGetMaxX(self.cropRect)){
+        xOffset = CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
+        CGFloat newLeftX = self.imageView.frame.origin.x + xOffset;
+        if(newLeftX > self.cropRect.origin.x) {
+            xOffset = self.cropRect.origin.x - self.imageView.frame.origin.x;
+        }
+    }
+    if (self.imageView.frame.origin.y > self.cropRect.origin.y) {
+        yOffset = - (self.imageView.frame.origin.y - self.cropRect.origin.y);
+        CGFloat newBottomY = CGRectGetMaxY(self.imageView.frame) + yOffset;
+        if(newBottomY < CGRectGetMaxY(self.cropRect)) {
+            yOffset = CGRectGetMaxY(self.cropRect) - CGRectGetMaxY(self.imageView.frame);
+        }
+    } else if(CGRectGetMaxY(self.imageView.frame) < CGRectGetMaxY(self.cropRect)){
+        yOffset = CGRectGetMaxY(self.cropRect) - CGRectGetMaxY(self.imageView.frame);
+        CGFloat newTopY = self.imageView.frame.origin.y + yOffset;
+        if(newTopY > self.cropRect.origin.y) {
+            yOffset = self.cropRect.origin.y - self.imageView.frame.origin.y;
+        }
+    }   
+    if(xOffset || yOffset){
+        self.view.userInteractionEnabled = NO;
+        CGAffineTransform transform =
+        CGAffineTransformTranslate(self.imageView.transform,
+                                   xOffset/self.scale, yOffset/self.scale);
+        [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+            self.imageView.transform = transform;
+        } completion:^(BOOL finished) {
+            self.view.userInteractionEnabled = YES;
+        }];
+    }
+}
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
-        if([self handleGestureState:recognizer.state]) {
+    if([self handleGestureState:recognizer.state]) {
         CGPoint translation = [recognizer translationInView:self.imageView];
         CGAffineTransform transform = CGAffineTransformTranslate( self.imageView.transform, translation.x, translation.y);
         self.imageView.transform = transform;
