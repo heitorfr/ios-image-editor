@@ -65,6 +65,10 @@ The width of the cropped image. If not defined, the width of the source image is
 #### minimumScale, maximumScale
 The bounds for image scaling. If not defined, image zoom is unlimited.
 
+#### checkBounds
+Set to true to bound the image scale and pan to the crop area so that you dont' get a black backround on the resulting image.
+This will work correctly only if rotation os not enabled. 
+
 #### panEnabled, rotateEnabled, scaleEnabled, tapToResetEnabled
 BOOL property to enable/disable specific gestures
 
@@ -73,7 +77,6 @@ Output Properties
 
 ####cropBoundsInSourceImage
 Returns a CGRect representing the current crop rectangle in the source image coordinates. Source image coordinates have the origin at the bottom left of the image. Note that, if rotation has been applyed, then cropBoundsInSourceImage represents the bounding box of the rotated crop rectangle.
-
 
 
 Interface

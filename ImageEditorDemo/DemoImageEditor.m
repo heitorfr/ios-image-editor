@@ -35,17 +35,20 @@
 - (IBAction)setSquareAction:(id)sender
 {
     self.cropSize = CGSizeMake(320, 320);
+    [self reset:YES];
 }
 
 - (IBAction)setLandscapeAction:(id)sender
 {
     self.cropSize = CGSizeMake(320, 240);
+    [self reset:YES];
 }
 
 
 - (IBAction)setLPortraitAction:(id)sender
 {
     self.cropSize = CGSizeMake(240, 320);
+    [self reset:YES];
 }
 
 #pragma mark Hooks
