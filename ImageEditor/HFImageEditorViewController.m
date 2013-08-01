@@ -554,10 +554,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     CGContextRef context = CGBitmapContextCreate(NULL,
                                                  size.width,
                                                  size.height,
-                                                 8, //CGImageGetBitsPerComponent(source),
+                                                 CGImageGetBitsPerComponent(source), //8,
                                                  0,
                                                  CGImageGetColorSpace(source),
-                                                 kCGImageAlphaNoneSkipFirst//CGImageGetBitmapInfo(source)
+                                                 CGImageGetBitmapInfo(source) //kCGImageAlphaNoneSkipFirst
                                                  );
     
     CGContextSetInterpolationQuality(context, quality);
