@@ -3,4 +3,6 @@
 
 @interface HFImageEditorFrameView : UIView<HFImageEditorFrame>
 
+@property (nonatomic) BOOL drawCropArea;
+
 @end
