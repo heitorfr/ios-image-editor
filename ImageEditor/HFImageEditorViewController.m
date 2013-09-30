@@ -11,13 +11,11 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 @interface HFImageEditorViewController ()
 @property (nonatomic,retain) UIImageView *imageView;
-@property (nonatomic,assign) CGRect cropRect;
 @property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
 @property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
 @property (retain, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
 @property (retain, nonatomic) IBOutlet UITapGestureRecognizer *tapRecognizer;
 @property (nonatomic,retain) IBOutlet UIView<HFImageEditorFrame> *frameView;
-
 
 @property(nonatomic,assign) NSUInteger gestureCount;
 @property(nonatomic,assign) CGPoint touchCenter;
@@ -34,7 +32,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @synthesize doneCallback = _doneCallback;
 @synthesize sourceImage = _sourceImage;
 @synthesize previewImage = _previewImage;
-@synthesize cropSize = _cropSize;
 @synthesize outputWidth = _outputWidth;
 @synthesize frameView = _frameView;
 @synthesize imageView = _imageView;
@@ -55,6 +52,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @dynamic scaleEnabled;
 @dynamic tapToResetEnabled;
 @dynamic cropBoundsInSourceImage;
+@dynamic cropRect;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -85,19 +83,21 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 #pragma mark Properties
 
-- (void)setCropSize:(CGSize)cropSize
+- (void)setCropRect:(CGRect)cropRect
 {
-    _cropSize = cropSize;
-    [self updateCropRect];
+    self.frameView.cropRect = cropRect;
 }
 
-- (CGSize)cropSize
+- (CGRect)cropRect
 {
-    if(_cropSize.width == 0 || _cropSize.height == 0) {
-        _cropSize = CGSizeMake(kDefaultCropWidth, kDefaultCropHeight);
+    if(self.frameView.cropRect.size.width == 0 || self.frameView.cropRect.size.height == 0) {
+        self.frameView.cropRect = CGRectMake((self.frameView.bounds.size.width-kDefaultCropWidth)/2,
+                                             (self.frameView.bounds.size.height-kDefaultCropHeight)/2,
+                                             kDefaultCropWidth,kDefaultCropHeight);
     }
-    return _cropSize;
+    return self.frameView.cropRect;
 }
+
 
 - (UIImage *)previewImage
 {
@@ -128,14 +128,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 }
 
 
-- (void)updateCropRect
-{
-    self.cropRect = CGRectMake((self.frameView.bounds.size.width-self.cropSize.width)/2,
-                               (self.frameView.bounds.size.height-self.cropSize.height)/2,
-                               self.cropSize.width, self.cropSize.height);
-    
-    self.frameView.cropRect = self.cropRect;
-}
 
 
 - (void)setPanEnabled:(BOOL)panEnabled
@@ -260,7 +252,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [self updateCropRect];
     [self reset:NO];
     self.imageView.image = self.previewImage;
     
@@ -308,7 +299,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                                          sourceSize:self.sourceImage.size
                                   sourceOrientation:self.sourceImage.imageOrientation
                                         outputWidth:self.outputWidth ? self.outputWidth : self.sourceImage.size.width
-                                            cropSize:self.cropSize
+                                            cropRect:self.cropRect
                                     imageViewSize:self.imageView.bounds.size];
         dispatch_async(dispatch_get_main_queue(), ^{
             UIImage *transform =  [UIImage imageWithCGImage:resultRef scale:1.0 orientation:UIImageOrientationUp];
@@ -581,7 +572,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     sourceSize:(CGSize)sourceSize
            sourceOrientation:(UIImageOrientation)sourceOrientation
                  outputWidth:(CGFloat)outputWidth
-                    cropSize:(CGSize)cropSize
+                    cropRect:(CGRect)cropRect
                imageViewSize:(CGSize)imageViewSize
 {
     CGImageRef source = [self newScaledImage:sourceImage
@@ -589,7 +580,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                                   toSize:sourceSize
                              withQuality:kCGInterpolationNone];
     
-    CGFloat aspect = cropSize.height/cropSize.width;
+    CGFloat aspect = cropRect.size.height/cropRect.size.width;
     CGSize outputSize = CGSizeMake(outputWidth, outputWidth*aspect);
     
     CGContextRef context = CGBitmapContextCreate(NULL,
@@ -602,9 +593,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     CGContextSetFillColorWithColor(context,  [[UIColor clearColor] CGColor]);
     CGContextFillRect(context, CGRectMake(0, 0, outputSize.width, outputSize.height));
     
-    CGAffineTransform uiCoords = CGAffineTransformMakeScale(outputSize.width/cropSize.width,
-                                                            outputSize.height/cropSize.height);
-    uiCoords = CGAffineTransformTranslate(uiCoords, cropSize.width/2.0, cropSize.height/2.0);
+    CGAffineTransform uiCoords = CGAffineTransformMakeScale(outputSize.width/cropRect.size.width,
+                                                            outputSize.height/cropRect.size.height);
+    uiCoords = CGAffineTransformTranslate(uiCoords, cropRect.size.width/2.0, cropRect.size.height/2.0);
     uiCoords = CGAffineTransformScale(uiCoords, 1.0, -1.0);
     CGContextConcatCTM(context, uiCoords);
     
@@ -630,7 +621,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     uiCoords = CGAffineTransformTranslate(uiCoords, self.imageView.bounds.size.width/2.0, self.imageView.bounds.size.height/2.0);
     uiCoords = CGAffineTransformScale(uiCoords, 1.0, -1.0);
 
-    CGRect crop =  CGRectMake(-self.cropSize.width/2.0, -self.cropSize.height/2.0, self.cropSize.width, self.cropSize.height);
+    CGRect crop =  CGRectMake(-self.cropRect.size.width/2.0, -self.cropRect.size.height/2.0, self.cropRect.size.width, self.cropRect.size.height);
     return CGRectApplyAffineTransform(crop, CGAffineTransformConcat(CGAffineTransformInvert(self.imageView.transform),uiCoords));
 }
 
