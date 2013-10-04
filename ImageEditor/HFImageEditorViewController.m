@@ -531,7 +531,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
             rotation = M_PI;
         } break;
         case UIImageOrientationLeft:{
-            rotation = M_PI_2;
+            rotation =M_PI_2;
             srcSize = CGSizeMake(size.height, size.width);
         } break;
         case UIImageOrientationRight: {
@@ -575,10 +575,30 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     cropRect:(CGRect)cropRect
                imageViewSize:(CGSize)imageViewSize
 {
-    CGImageRef source = [self newScaledImage:sourceImage
-                         withOrientation:sourceOrientation
-                                  toSize:sourceSize
-                             withQuality:kCGInterpolationNone];
+
+    CGImageRef source = sourceImage;
+    CGFloat rotation = 0.0;
+        
+    switch(sourceOrientation)
+    {
+        case UIImageOrientationUp: {
+            rotation = 0;
+        } break;
+        case UIImageOrientationDown: {
+            rotation = M_PI;
+        } break;
+        case UIImageOrientationLeft:{
+            rotation = M_PI_2;
+            imageViewSize = CGSizeMake(imageViewSize.height, imageViewSize.width);
+        } break;
+        case UIImageOrientationRight: {
+            rotation = -M_PI_2;
+            imageViewSize = CGSizeMake(imageViewSize.height, imageViewSize.width);
+        } break;
+        default:
+            break;
+    }
+
     
     CGFloat aspect = cropRect.size.height/cropRect.size.width;
     CGSize outputSize = CGSizeMake(outputWidth, outputWidth*aspect);
@@ -596,9 +616,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     CGAffineTransform uiCoords = CGAffineTransformMakeScale(outputSize.width/cropRect.size.width,
                                                             outputSize.height/cropRect.size.height);
     uiCoords = CGAffineTransformTranslate(uiCoords, cropRect.size.width/2.0, cropRect.size.height/2.0);
-    uiCoords = CGAffineTransformScale(uiCoords, 1.0, -1.0);
     CGContextConcatCTM(context, uiCoords);
-    
+    CGContextRotateCTM(context, rotation); // orientation fix
+    uiCoords = CGAffineTransformMakeScale(1.0, -1.0);
+    CGContextConcatCTM(context, uiCoords);
     CGContextConcatCTM(context, transform);
     CGContextScaleCTM(context, 1.0, -1.0);
     
@@ -610,7 +631,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     
     CGImageRef resultRef = CGBitmapContextCreateImage(context);
     CGContextRelease(context);
-    CGImageRelease(source);
+    //CGImageRelease(source);
     return resultRef;
 }
 
