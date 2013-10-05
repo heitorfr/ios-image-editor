@@ -53,6 +53,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @dynamic tapToResetEnabled;
 @dynamic cropBoundsInSourceImage;
 @dynamic cropRect;
+@dynamic cropSize;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -98,6 +99,17 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return self.frameView.cropRect;
 }
 
+- (void)setCropSize:(CGSize)cropSize
+{
+    self.cropRect = CGRectMake((self.frameView.bounds.size.width-cropSize.width)/2,
+                               (self.frameView.bounds.size.height-cropSize.height)/2,
+                               cropSize.width,cropSize.height);
+}
+
+- (CGSize)cropSize
+{
+    return self.frameView.cropRect.size;
+}
 
 - (UIImage *)previewImage
 {
@@ -520,40 +532,50 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 - (CGImageRef)newScaledImage:(CGImageRef)source withOrientation:(UIImageOrientation)orientation toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
 {
     CGSize srcSize = size;
-    CGFloat rotation = 0.0;
+    CGAffineTransform transform = CGAffineTransformIdentity;
     
     switch(orientation)
     {
-        case UIImageOrientationUp: {
-            rotation = 0;
+        case UIImageOrientationUp:// EXIF 1
+        case UIImageOrientationUpMirrored:{ // EXIF 2
         } break;
-        case UIImageOrientationDown: {
-            rotation = M_PI;
+        case UIImageOrientationDown: // EXIF 3
+        case UIImageOrientationDownMirrored: { // EXIF 4
+            transform = CGAffineTransformMakeRotation(M_PI);
         } break;
-        case UIImageOrientationLeft:{
-            rotation = M_PI_2;
+        case UIImageOrientationLeftMirrored: // EXIF 5
+        case UIImageOrientationLeft: {// EXIF 6
+            transform = CGAffineTransformMakeRotation(M_PI_2);
             srcSize = CGSizeMake(size.height, size.width);
         } break;
-        case UIImageOrientationRight: {
-            rotation = -M_PI_2;
+        case UIImageOrientationRightMirrored: // EXIF 7
+        case UIImageOrientationRight: { // EXIF 8
+            transform = CGAffineTransformMakeRotation(-M_PI_2);
             srcSize = CGSizeMake(size.height, size.width);
         } break;
         default:
             break;
     }
     
+    if(orientation == UIImageOrientationUpMirrored || orientation == UIImageOrientationDownMirrored ||
+       orientation == UIImageOrientationLeftMirrored || orientation == UIImageOrientationRightMirrored) {
+        transform = CGAffineTransformScale(transform, -1, 1);
+    }
+    
+    
+    
     CGContextRef context = CGBitmapContextCreate(NULL,
                                                  size.width,
                                                  size.height,
-                                                 8, //CGImageGetBitsPerComponent(source),
+                                                 CGImageGetBitsPerComponent(source),
                                                  0,
                                                  CGImageGetColorSpace(source),
-                                                 kCGImageAlphaNoneSkipFirst//CGImageGetBitmapInfo(source)
+                                                 CGImageGetBitmapInfo(source)
                                                  );
     
     CGContextSetInterpolationQuality(context, quality);
     CGContextTranslateCTM(context,  size.width/2,  size.height/2);
-    CGContextRotateCTM(context,rotation);
+    CGContextConcatCTM(context, transform);
     
     CGContextDrawImage(context, CGRectMake(-srcSize.width/2 ,
                                            -srcSize.height/2,
