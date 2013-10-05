@@ -35,7 +35,7 @@
     
     self.library = [[[ALAssetsLibrary alloc] init] autorelease];
     self.imageEditor = [[[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil] autorelease];
-    self.imageEditor.checkBounds = YES;
+    self.imageEditor.checkBounds = NO;
     
     self.imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {

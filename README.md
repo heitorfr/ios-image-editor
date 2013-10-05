@@ -1,7 +1,7 @@
 iOS Image Editor
 ================
 
-A iOS View Controller for image cropping. An alternative to the UIImagePickerController editor with extended features.
+A iOS View Controller for image cropping. An alternative to the UIImagePickerController editor with extended features. Drop me a line if your're using this on your apps, I would like to know.
 
 Features
 --------
@@ -13,6 +13,7 @@ Features
 * Handles EXIF orientations
 * Configurable
 * Plug-in your own interface
+
 
 Usage
 -----
@@ -107,6 +108,7 @@ ChangeLog
 #### Features:
 
 * Crop rectangle does not have to be centered - use cropRect to specify the crop area instead of cropSize
+* One step transform - orientation fix and cropping on the same operation for improved memory footprint and speed
 
 #### Bug fixes:
 
