@@ -10,7 +10,7 @@ Features
 * Unlimited pan, zoom and rotation
 * Zoom and rotation centered on touch area
 * Double tap to reset
-* Handles EXIF orientations [supported by iPhone](http://www.gotow.net/creative/wordpress/?p=64)
+* Handles EXIF orientations
 * Configurable
 * Plug-in your own interface
 
@@ -59,6 +59,9 @@ The callback block called when the image editor completes. Returns the cropped i
 #### cropSize
 A CGSize specifying the width and height of the crop area in screen coordinates.
 
+#### cropRect
+A CGRect specifying the crop area in screen coordinates. Use instead of `cropSize` if the crop area is not centered.
+
 #### outputWidth
 The width of the cropped image. If not defined, the width of the source image is assumed.
 
@@ -99,6 +102,15 @@ ChangeLog
 #### Features:
 
 * New <code>checkBounds</code> setting to bound the image scale and pan to avoid clear space (only if rotation is not enabled).
+
+#### 1.1.1
+#### Features:
+
+* Crop rectangle does not have to be centered - use cropRect to specify the crop area instead of cropSize
+
+#### Bug fixes:
+
+* Support all EXIF orientation 
 
 License
 ---------

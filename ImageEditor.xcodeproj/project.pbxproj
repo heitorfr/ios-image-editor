@@ -22,7 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		EC23E835167B5B7A00314147 /* HFImageEditorViewController+SubclassingHooks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "HFImageEditorViewController+SubclassingHooks.h"; sourceTree = "<group>"; };
+		EC23E835167B5B7A00314147 /* HFImageEditorViewController+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "HFImageEditorViewController+Private.h"; sourceTree = "<group>"; };
 		EC23E838167B5C3200314147 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		EC23E84F167B600D00314147 /* DemoImageEditor.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DemoImageEditor.xib; sourceTree = "<group>"; };
 		EC23EAE815ECC5610051EA9E /* ImageEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,7 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				EC23EB0C15ECC5F80051EA9E /* HFImageEditorViewController.h */,
-				EC23E835167B5B7A00314147 /* HFImageEditorViewController+SubclassingHooks.h */,
+				EC23E835167B5B7A00314147 /* HFImageEditorViewController+Private.h */,
 				EC23EB0D15ECC5F80051EA9E /* HFImageEditorViewController.m */,
 				EC23EB1115ECC6350051EA9E /* HFImageEditorFrameView.h */,
 				EC23EB1215ECC6350051EA9E /* HFImageEditorFrameView.m */,
