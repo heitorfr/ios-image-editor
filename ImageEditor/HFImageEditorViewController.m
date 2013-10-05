@@ -519,6 +519,44 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 # pragma mark Image Transformation
 
+- (void)transform:(CGAffineTransform*)transform andSize:(CGSize *)size forOrientation:(UIImageOrientation)orientation
+{
+    *transform = CGAffineTransformIdentity;
+    BOOL transpose = NO;
+    
+    switch(orientation)
+    {
+        case UIImageOrientationUp:// EXIF 1
+        case UIImageOrientationUpMirrored:{ // EXIF 2
+        } break;
+        case UIImageOrientationDown: // EXIF 3
+        case UIImageOrientationDownMirrored: { // EXIF 4
+            *transform = CGAffineTransformMakeRotation(M_PI);
+        } break;
+        case UIImageOrientationLeftMirrored: // EXIF 5
+        case UIImageOrientationLeft: {// EXIF 6
+            *transform = CGAffineTransformMakeRotation(M_PI_2);
+            transpose = YES;
+        } break;
+        case UIImageOrientationRightMirrored: // EXIF 7
+        case UIImageOrientationRight: { // EXIF 8
+            *transform = CGAffineTransformMakeRotation(-M_PI_2);
+            transpose = YES;
+        } break;
+        default:
+            break;
+    }
+    
+    if(orientation == UIImageOrientationUpMirrored || orientation == UIImageOrientationDownMirrored ||
+       orientation == UIImageOrientationLeftMirrored || orientation == UIImageOrientationRightMirrored) {
+        *transform = CGAffineTransformScale(*transform, -1, 1);
+    }
+    
+    if(transpose) {
+        *size = CGSizeMake(size->height, size->width);
+    }
+}
+
 
 - (UIImage *)scaledImage:(UIImage *)source toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
 {
@@ -532,37 +570,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 - (CGImageRef)newScaledImage:(CGImageRef)source withOrientation:(UIImageOrientation)orientation toSize:(CGSize)size withQuality:(CGInterpolationQuality)quality
 {
     CGSize srcSize = size;
-    CGAffineTransform transform = CGAffineTransformIdentity;
-    
-    switch(orientation)
-    {
-        case UIImageOrientationUp:// EXIF 1
-        case UIImageOrientationUpMirrored:{ // EXIF 2
-        } break;
-        case UIImageOrientationDown: // EXIF 3
-        case UIImageOrientationDownMirrored: { // EXIF 4
-            transform = CGAffineTransformMakeRotation(M_PI);
-        } break;
-        case UIImageOrientationLeftMirrored: // EXIF 5
-        case UIImageOrientationLeft: {// EXIF 6
-            transform = CGAffineTransformMakeRotation(M_PI_2);
-            srcSize = CGSizeMake(size.height, size.width);
-        } break;
-        case UIImageOrientationRightMirrored: // EXIF 7
-        case UIImageOrientationRight: { // EXIF 8
-            transform = CGAffineTransformMakeRotation(-M_PI_2);
-            srcSize = CGSizeMake(size.height, size.width);
-        } break;
-        default:
-            break;
-    }
-    
-    if(orientation == UIImageOrientationUpMirrored || orientation == UIImageOrientationDownMirrored ||
-       orientation == UIImageOrientationLeftMirrored || orientation == UIImageOrientationRightMirrored) {
-        transform = CGAffineTransformScale(transform, -1, 1);
-    }
-    
-    
+    CGAffineTransform transform;
+    [self transform:&transform andSize:&srcSize forOrientation:orientation];
     
     CGContextRef context = CGBitmapContextCreate(NULL,
                                                  size.width,
@@ -597,10 +606,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     cropRect:(CGRect)cropRect
                imageViewSize:(CGSize)imageViewSize
 {
-    CGImageRef source = [self newScaledImage:sourceImage
-                         withOrientation:sourceOrientation
-                                  toSize:sourceSize
-                             withQuality:kCGInterpolationNone];
+    CGImageRef source = sourceImage;
+    
+    CGAffineTransform orientationTransform;
+    [self transform:&orientationTransform andSize:&imageViewSize forOrientation:sourceOrientation];
     
     CGFloat aspect = cropRect.size.height/cropRect.size.width;
     CGSize outputSize = CGSizeMake(outputWidth, outputWidth*aspect);
@@ -623,6 +632,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     
     CGContextConcatCTM(context, transform);
     CGContextScaleCTM(context, 1.0, -1.0);
+    CGContextConcatCTM(context, orientationTransform);
     
     CGContextDrawImage(context, CGRectMake(-imageViewSize.width/2.0,
                                            -imageViewSize.height/2.0,
@@ -632,7 +642,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     
     CGImageRef resultRef = CGBitmapContextCreateImage(context);
     CGContextRelease(context);
-    CGImageRelease(source);
     return resultRef;
 }
 
