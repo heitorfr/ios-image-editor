@@ -404,10 +404,13 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     } completion:^(BOOL finished) {
                         self.view.userInteractionEnabled = YES;
                         self.scale = scale;
+						if(self.checkBounds)
+							[self doCheckBounds];
                     }];
                     
                 }
-                if(self.checkBounds) [self doCheckBounds];
+                else if (self.checkBounds)
+					[self doCheckBounds];
             }
         } break;
         default:

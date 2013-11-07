@@ -41,7 +41,7 @@
         if(!canceled) {
           
             [self.library writeImageToSavedPhotosAlbum:[editedImage CGImage]
-                                      orientation:editedImage.imageOrientation
+                                      orientation:(ALAssetOrientation)editedImage.imageOrientation
                                   completionBlock:^(NSURL *assetURL, NSError *error){
                                       if (error) {
                                           UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error Saving"
