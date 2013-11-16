@@ -9,10 +9,21 @@ typedef struct {
 
 @property(assign,nonatomic) CGRect rectangle;
 @property(assign,nonatomic) Rectangle rectangle2;
+@property(assign,nonatomic) Rectangle rectangle3;
 @end
 
 
 @implementation TestView
+
+- (void)drawRectangle:(Rectangle)rectangle inContext:(CGContextRef)context
+{
+    CGContextMoveToPoint(context, rectangle.tl.x, rectangle.tl.y);
+    CGContextAddLineToPoint(context, rectangle.tr.x, rectangle.tr.y);
+    CGContextAddLineToPoint(context, rectangle.br.x, rectangle.br.y);
+    CGContextAddLineToPoint(context, rectangle.bl.x, rectangle.bl.y);
+    CGContextAddLineToPoint(context, rectangle.tl.x, rectangle.tl.y);
+    CGContextStrokePath(context);
+}
 
 - (void)drawRect:(CGRect)rect
 {
@@ -24,12 +35,11 @@ typedef struct {
     
     CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
     CGContextSetLineWidth(context, 10);
-    CGContextMoveToPoint(context, self.rectangle2.tl.x, self.rectangle2.tl.y);
-    CGContextAddLineToPoint(context, self.rectangle2.tr.x, self.rectangle2.tr.y);
-    CGContextAddLineToPoint(context, self.rectangle2.br.x, self.rectangle2.br.y);
-    CGContextAddLineToPoint(context, self.rectangle2.bl.x, self.rectangle2.bl.y);
-    CGContextAddLineToPoint(context, self.rectangle2.tl.x, self.rectangle2.tl.y);
-    CGContextStrokePath(context);
+    [self drawRectangle:self.rectangle2 inContext:context];
+    
+    CGContextSetStrokeColorWithColor(context, [UIColor blueColor].CGColor);
+    CGContextSetLineWidth(context, 2);
+    [self drawRectangle:self.rectangle3 inContext:context];
 }
 
 @end
@@ -503,6 +513,13 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     tview.rectangle = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
     tview.rectangle2 = [self applyTransform:self.imageView.transform toRect:self.initialImageFrame];
     
+    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(self.cropRect), CGRectGetMidY(self.cropRect));
+    t = CGAffineTransformRotate(t, -[self imageRotation]);
+    t = CGAffineTransformTranslate(t, -CGRectGetMidX(self.cropRect), -CGRectGetMidY(self.cropRect));
+    
+    tview.rectangle3 = [self applyTransform:t toRectangle:tview.rectangle2];
+    
+    NSLog(@"Bound check: %d",CGRectContainsRect([self CGRectFromRectangle:tview.rectangle3],tview.rectangle));
     [tview setNeedsDisplay];
     
 }
@@ -736,12 +753,21 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return CGRectApplyAffineTransform(rect, t);
 }
 
-- (Rectangle)rectangleFromCGRect:(CGRect)rect {
+- (Rectangle)RectangleFromCGRect:(CGRect)rect
+{
     return (Rectangle) {
         .tl = (CGPoint){rect.origin.x, rect.origin.y},
         .tr = (CGPoint){CGRectGetMaxX(rect), rect.origin.y},
         .br = (CGPoint){CGRectGetMaxX(rect), CGRectGetMaxY(rect)},
         .bl = (CGPoint){rect.origin.x, CGRectGetMaxY(rect)}
+    };
+}
+
+-(CGRect)CGRectFromRectangle:(Rectangle)rect
+{
+    return (CGRect) {
+        .origin = rect.tl,
+        .size = (CGSize){.width = rect.tr.x - rect.tl.x, .height = rect.bl.y - rect.tl.y}
     };
 }
 
@@ -751,7 +777,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     t = CGAffineTransformConcat(self.imageView.transform, t);
     t = CGAffineTransformTranslate(t,-CGRectGetMidX(rect), -CGRectGetMidY(rect));
     
-    Rectangle r = [self rectangleFromCGRect:rect];
+    Rectangle r = [self RectangleFromCGRect:rect];
     return (Rectangle) {
         .tl = CGPointApplyAffineTransform(r.tl, t),
         .tr = CGPointApplyAffineTransform(r.tr, t),
@@ -759,6 +785,17 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         .bl = CGPointApplyAffineTransform(r.bl, t)
     };
 }
+
+- (Rectangle)applyTransform:(CGAffineTransform)t toRectangle:(Rectangle)r
+{
+    return (Rectangle) {
+        .tl = CGPointApplyAffineTransform(r.tl, t),
+        .tr = CGPointApplyAffineTransform(r.tr, t),
+        .br = CGPointApplyAffineTransform(r.br, t),
+        .bl = CGPointApplyAffineTransform(r.bl, t)
+    };
+}
+
 
 
 @end
