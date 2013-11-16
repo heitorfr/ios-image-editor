@@ -1,6 +1,25 @@
 #import "HFImageEditorViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
+
+@interface TestView : UIView
+@property(assign,nonatomic) CGRect rectangle;
+@end
+
+@implementation TestView
+
+- (void)drawRect:(CGRect)rect
+{
+    [super drawRect:rect];
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetStrokeColorWithColor(context, [UIColor redColor].CGColor);
+    CGContextSetLineWidth(context, 5);
+    CGContextStrokeRect(context, self.rectangle);
+}
+
+@end
+
+
 static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
 static const CGFloat kDefaultCropWidth = 320;
@@ -487,7 +506,11 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
         recognizer.rotation = 0;
     }
-
+    
+    NSLog(@"ROTATION: %.2f", [self imageRotation]);
+    TestView *tview =  (TestView*)self.view;
+    tview.rectangle = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
+    [tview setNeedsDisplay];
 }
 
 - (IBAction)handlePinch:(UIPinchGestureRecognizer *)recognizer
@@ -517,7 +540,11 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return YES;
 }
 
+
+
+
 # pragma mark Image Transformation
+
 
 - (void)transform:(CGAffineTransform*)transform andSize:(CGSize *)size forOrientation:(UIImageOrientation)orientation
 {
@@ -667,6 +694,23 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 {
 }
 
+#pragma mark - Util
+
+- (CGFloat) imageRotation
+{
+    CGAffineTransform t = self.imageView.transform;
+    return atan2f(t.b, t.a);
+}
+
+- (CGRect)boundingBoxForRect:(CGRect)rect rotatedByRadians:(CGFloat)angle
+{
+    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(rect), CGRectGetMidY(rect));
+    t = CGAffineTransformRotate(t,angle);
+    t = CGAffineTransformTranslate(t,-CGRectGetMidX(rect), -CGRectGetMidY(rect));
+    return CGRectApplyAffineTransform(rect, t);
+}
 
 
 @end
+
+
