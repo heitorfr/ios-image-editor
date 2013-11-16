@@ -51,7 +51,7 @@ static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
 static const CGFloat kBoundingBoxInset = 15;
 static const NSTimeInterval kAnimationIntervalReset = 0.25;
-static const NSTimeInterval kAnimationIntervalTransform = 0.2;
+static const NSTimeInterval kAnimationIntervalTransform = 0.25;
 
 @interface HFImageEditorViewController ()
 @property (nonatomic,retain) UIImageView *imageView;
@@ -69,6 +69,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 // Test
 @property(nonatomic, assign) CGRect initialImageFrame;
+@property(nonatomic, assign) CGAffineTransform validTransform;
 
 @end
 
@@ -252,11 +253,12 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         self.minimumScale = 1;
     }
     self.initialImageFrame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
+    self.validTransform = CGAffineTransformMakeScale(self.scale, self.scale);
     
     void (^doReset)(void) = ^{
         self.imageView.transform = CGAffineTransformIdentity;
         self.imageView.frame = self.initialImageFrame;
-        self.imageView.transform = CGAffineTransformMakeScale(self.scale, self.scale);
+        self.imageView.transform = self.validTransform;
     };
     if(animated) {
         self.view.userInteractionEnabled = NO;
@@ -448,14 +450,26 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
                     self.view.userInteractionEnabled = NO;
                     [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                        self.imageView.transform = transform;            
+                        if([self checkBoundsWithTransform:transform]) {
+                            self.validTransform = transform;
+                        }
+                        self.imageView.transform = self.validTransform;
                     } completion:^(BOOL finished) {
                         self.view.userInteractionEnabled = YES;
                         self.scale = scale;
                     }];
                     
+                } else {
+                    self.view.userInteractionEnabled = NO;
+                    [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                        self.imageView.transform = self.validTransform;
+                    } completion:^(BOOL finished) {
+                        self.view.userInteractionEnabled = YES;
+                    }];
+
+                    self.imageView.transform = self.validTransform;
                 }
-                if(self.checkBounds) [self doCheckBounds];
+                //if(self.checkBounds) [self doCheckBounds];
             }
         } break;
         default:
@@ -507,6 +521,20 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     }
 }
 
+- (BOOL)checkBoundsWithTransform:(CGAffineTransform)transform
+{
+    CGRect r1 = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
+    Rectangle r2 = [self applyTransform:transform toRect:self.initialImageFrame];
+    
+    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(self.cropRect), CGRectGetMidY(self.cropRect));
+    t = CGAffineTransformRotate(t, -[self imageRotation]);
+    t = CGAffineTransformTranslate(t, -CGRectGetMidX(self.cropRect), -CGRectGetMidY(self.cropRect));
+    
+    Rectangle r3 = [self applyTransform:t toRectangle:r2];
+    
+    return CGRectContainsRect([self CGRectFromRectangle:r3],r1);
+}
+
 - (void)updateTestFrames
 {
     TestView *tview =  (TestView*)self.view;
@@ -530,6 +558,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         CGPoint translation = [recognizer translationInView:self.imageView];
         CGAffineTransform transform = CGAffineTransformTranslate( self.imageView.transform, translation.x, translation.y);
         self.imageView.transform = transform;
+        if([self checkBoundsWithTransform:self.imageView.transform]) {
+            self.validTransform = transform;
+        }
 
         [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
     }
@@ -549,6 +580,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         transform = CGAffineTransformRotate(transform, recognizer.rotation);
         transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
         self.imageView.transform = transform;
+        
+        if([self checkBoundsWithTransform:self.imageView.transform]) {
+            self.validTransform = transform;
+        }
 
         recognizer.rotation = 0;
     }
@@ -571,6 +606,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         self.imageView.transform = transform;
 
         recognizer.scale = 1;
+        
+        if([self checkBoundsWithTransform:self.imageView.transform]) {
+            self.validTransform = transform;
+        }
     }
     [self updateTestFrames];
 }
