@@ -1,10 +1,16 @@
 #import "HFImageEditorViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
+typedef struct {
+    CGPoint tl,tr,bl,br;
+} Rectangle;
 
 @interface TestView : UIView
+
 @property(assign,nonatomic) CGRect rectangle;
+@property(assign,nonatomic) Rectangle rectangle2;
 @end
+
 
 @implementation TestView
 
@@ -15,6 +21,15 @@
     CGContextSetStrokeColorWithColor(context, [UIColor redColor].CGColor);
     CGContextSetLineWidth(context, 5);
     CGContextStrokeRect(context, self.rectangle);
+    
+    CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
+    CGContextSetLineWidth(context, 10);
+    CGContextMoveToPoint(context, self.rectangle2.tl.x, self.rectangle2.tl.y);
+    CGContextAddLineToPoint(context, self.rectangle2.tr.x, self.rectangle2.tr.y);
+    CGContextAddLineToPoint(context, self.rectangle2.br.x, self.rectangle2.br.y);
+    CGContextAddLineToPoint(context, self.rectangle2.bl.x, self.rectangle2.bl.y);
+    CGContextAddLineToPoint(context, self.rectangle2.tl.x, self.rectangle2.tl.y);
+    CGContextStrokePath(context);
 }
 
 @end
@@ -41,6 +56,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @property(nonatomic,assign) CGPoint rotationCenter;
 @property(nonatomic,assign) CGPoint scaleCenter;
 @property(nonatomic,assign) CGFloat scale;
+
+// Test
+@property(nonatomic, assign) CGRect initialImageFrame;
 
 @end
 
@@ -223,10 +241,11 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     if(self.checkBounds) {
         self.minimumScale = 1;
     }
+    self.initialImageFrame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
     
     void (^doReset)(void) = ^{
         self.imageView.transform = CGAffineTransformIdentity;
-        self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
+        self.imageView.frame = self.initialImageFrame;
         self.imageView.transform = CGAffineTransformMakeScale(self.scale, self.scale);
     };
     if(animated) {
@@ -478,6 +497,16 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     }
 }
 
+- (void)updateTestFrames
+{
+    TestView *tview =  (TestView*)self.view;
+    tview.rectangle = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
+    tview.rectangle2 = [self applyTransform:self.imageView.transform toRect:self.initialImageFrame];
+    
+    [tview setNeedsDisplay];
+    
+}
+
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
     if([self handleGestureState:recognizer.state]) {
@@ -487,7 +516,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
         [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
     }
-
+    [self updateTestFrames];
 }
 
 - (IBAction)handleRotation:(UIRotationGestureRecognizer*)recognizer
@@ -506,11 +535,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
         recognizer.rotation = 0;
     }
-    
-    NSLog(@"ROTATION: %.2f", [self imageRotation]);
-    TestView *tview =  (TestView*)self.view;
-    tview.rectangle = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
-    [tview setNeedsDisplay];
+    [self updateTestFrames];
 }
 
 - (IBAction)handlePinch:(UIPinchGestureRecognizer *)recognizer
@@ -530,6 +555,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
         recognizer.scale = 1;
     }
+    [self updateTestFrames];
 }
 
 - (IBAction)handleTap:(UITapGestureRecognizer *)recogniser {
@@ -708,6 +734,30 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     t = CGAffineTransformRotate(t,angle);
     t = CGAffineTransformTranslate(t,-CGRectGetMidX(rect), -CGRectGetMidY(rect));
     return CGRectApplyAffineTransform(rect, t);
+}
+
+- (Rectangle)rectangleFromCGRect:(CGRect)rect {
+    return (Rectangle) {
+        .tl = (CGPoint){rect.origin.x, rect.origin.y},
+        .tr = (CGPoint){CGRectGetMaxX(rect), rect.origin.y},
+        .br = (CGPoint){CGRectGetMaxX(rect), CGRectGetMaxY(rect)},
+        .bl = (CGPoint){rect.origin.x, CGRectGetMaxY(rect)}
+    };
+}
+
+- (Rectangle)applyTransform:(CGAffineTransform)transform toRect:(CGRect)rect
+{
+    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(rect), CGRectGetMidY(rect));
+    t = CGAffineTransformConcat(self.imageView.transform, t);
+    t = CGAffineTransformTranslate(t,-CGRectGetMidX(rect), -CGRectGetMidY(rect));
+    
+    Rectangle r = [self rectangleFromCGRect:rect];
+    return (Rectangle) {
+        .tl = CGPointApplyAffineTransform(r.tl, t),
+        .tr = CGPointApplyAffineTransform(r.tr, t),
+        .br = CGPointApplyAffineTransform(r.br, t),
+        .bl = CGPointApplyAffineTransform(r.bl, t)
+    };
 }
 
 
