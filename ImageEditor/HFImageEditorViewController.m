@@ -51,7 +51,7 @@ static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
 static const CGFloat kBoundingBoxInset = 15;
 static const NSTimeInterval kAnimationIntervalReset = 0.25;
-static const NSTimeInterval kAnimationIntervalTransform = 0.25;
+static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 @interface HFImageEditorViewController ()
 @property (nonatomic,retain) UIImageView *imageView;
@@ -535,22 +535,22 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
     return CGRectContainsRect([self CGRectFromRectangle:r3],r1);
 }
 
-- (void)updateTestFrames
-{
-    TestView *tview =  (TestView*)self.view;
-    tview.rectangle = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
-    tview.rectangle2 = [self applyTransform:self.imageView.transform toRect:self.initialImageFrame];
-    
-    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(self.cropRect), CGRectGetMidY(self.cropRect));
-    t = CGAffineTransformRotate(t, -[self imageRotation]);
-    t = CGAffineTransformTranslate(t, -CGRectGetMidX(self.cropRect), -CGRectGetMidY(self.cropRect));
-    
-    tview.rectangle3 = [self applyTransform:t toRectangle:tview.rectangle2];
-    
-    NSLog(@"Bound check: %d",CGRectContainsRect([self CGRectFromRectangle:tview.rectangle3],tview.rectangle));
-    [tview setNeedsDisplay];
-    
-}
+//- (void)updateTestFrames
+//{
+//    TestView *tview =  (TestView*)self.view;
+//    tview.rectangle = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
+//    tview.rectangle2 = [self applyTransform:self.imageView.transform toRect:self.initialImageFrame];
+//    
+//    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(self.cropRect), CGRectGetMidY(self.cropRect));
+//    t = CGAffineTransformRotate(t, -[self imageRotation]);
+//    t = CGAffineTransformTranslate(t, -CGRectGetMidX(self.cropRect), -CGRectGetMidY(self.cropRect));
+//    
+//    tview.rectangle3 = [self applyTransform:t toRectangle:tview.rectangle2];
+//    
+//    NSLog(@"Bound check: %d",CGRectContainsRect([self CGRectFromRectangle:tview.rectangle3],tview.rectangle));
+//    [tview setNeedsDisplay];
+//    
+//}
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
@@ -564,7 +564,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
 
         [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
     }
-    [self updateTestFrames];
+//    [self updateTestFrames];
 }
 
 - (IBAction)handleRotation:(UIRotationGestureRecognizer*)recognizer
@@ -587,7 +587,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
 
         recognizer.rotation = 0;
     }
-    [self updateTestFrames];
+//    [self updateTestFrames];
 }
 
 - (IBAction)handlePinch:(UIPinchGestureRecognizer *)recognizer
@@ -611,7 +611,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.25;
             self.validTransform = transform;
         }
     }
-    [self updateTestFrames];
+//    [self updateTestFrames];
 }
 
 - (IBAction)handleTap:(UITapGestureRecognizer *)recogniser {
