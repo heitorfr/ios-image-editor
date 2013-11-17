@@ -35,7 +35,8 @@
     
     self.library = [[[ALAssetsLibrary alloc] init] autorelease];
     self.imageEditor = [[[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil] autorelease];
-    self.imageEditor.checkBounds = NO;
+    self.imageEditor.checkBounds = YES;
+    self.imageEditor.rotateEnabled = YES;
     
     self.imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {

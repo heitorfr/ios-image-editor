@@ -1,6 +1,17 @@
 #import "HFImageEditorViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
+typedef struct {
+    CGPoint tl,tr,bl,br;
+} Rectangle;
+
+@interface TestView : UIView
+
+@property(assign,nonatomic) CGRect rectangle;
+@property(assign,nonatomic) Rectangle rectangle2;
+@property(assign,nonatomic) Rectangle rectangle3;
+@end
+
 static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
 static const CGFloat kDefaultCropWidth = 320;
@@ -22,6 +33,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @property(nonatomic,assign) CGPoint rotationCenter;
 @property(nonatomic,assign) CGPoint scaleCenter;
 @property(nonatomic,assign) CGFloat scale;
+
+// Test
+@property(nonatomic, assign) CGRect initialImageFrame;
+@property(nonatomic, assign) CGAffineTransform validTransform;
 
 @end
 
@@ -204,11 +219,13 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     if(self.checkBounds) {
         self.minimumScale = 1;
     }
+    self.initialImageFrame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
+    self.validTransform = CGAffineTransformMakeScale(self.scale, self.scale);
     
     void (^doReset)(void) = ^{
         self.imageView.transform = CGAffineTransformIdentity;
-        self.imageView.frame = CGRectMake(CGRectGetMidX(self.cropRect) - w/2, CGRectGetMidY(self.cropRect) - h/2,w,h);
-        self.imageView.transform = CGAffineTransformMakeScale(self.scale, self.scale);
+        self.imageView.frame = self.initialImageFrame;
+        self.imageView.transform = self.validTransform;
     };
     if(animated) {
         self.view.userInteractionEnabled = NO;
@@ -398,16 +415,25 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform, deltaX, deltaY);
                     transform = CGAffineTransformScale(transform, scale/self.scale , scale/self.scale);
                     transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
+                    [self checkBoundsWithTransform:transform];
                     self.view.userInteractionEnabled = NO;
                     [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                        self.imageView.transform = transform;            
+                        self.imageView.transform = self.validTransform;
                     } completion:^(BOOL finished) {
                         self.view.userInteractionEnabled = YES;
                         self.scale = scale;
                     }];
                     
+                } else {
+                    self.view.userInteractionEnabled = NO;
+                    [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                        self.imageView.transform = self.validTransform;
+                    } completion:^(BOOL finished) {
+                        self.view.userInteractionEnabled = YES;
+                    }];
+
+                    self.imageView.transform = self.validTransform;
                 }
-                if(self.checkBounds) [self doCheckBounds];
             }
         } break;
         default:
@@ -416,48 +442,28 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return handle;
 }
 
--(void)doCheckBounds {
-    CGFloat yOffset = 0;
-    CGFloat xOffset = 0;
-    
-    if(self.imageView.frame.origin.x > self.cropRect.origin.x){
-        xOffset =  - (self.imageView.frame.origin.x - self.cropRect.origin.x);
-        CGFloat newRightX = CGRectGetMaxX(self.imageView.frame) + xOffset;
-        if(newRightX < CGRectGetMaxX(self.cropRect)) {
-            xOffset =  CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
-        }
-    } else if(CGRectGetMaxX(self.imageView.frame) < CGRectGetMaxX(self.cropRect)){
-        xOffset = CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
-        CGFloat newLeftX = self.imageView.frame.origin.x + xOffset;
-        if(newLeftX > self.cropRect.origin.x) {
-            xOffset = self.cropRect.origin.x - self.imageView.frame.origin.x;
-        }
+
+- (void)checkBoundsWithTransform:(CGAffineTransform)transform
+{
+    if(!self.checkBounds) {
+        self.validTransform = transform;
+        return;
     }
-    if (self.imageView.frame.origin.y > self.cropRect.origin.y) {
-        yOffset = - (self.imageView.frame.origin.y - self.cropRect.origin.y);
-        CGFloat newBottomY = CGRectGetMaxY(self.imageView.frame) + yOffset;
-        if(newBottomY < CGRectGetMaxY(self.cropRect)) {
-            yOffset = CGRectGetMaxY(self.cropRect) - CGRectGetMaxY(self.imageView.frame);
-        }
-    } else if(CGRectGetMaxY(self.imageView.frame) < CGRectGetMaxY(self.cropRect)){
-        yOffset = CGRectGetMaxY(self.cropRect) - CGRectGetMaxY(self.imageView.frame);
-        CGFloat newTopY = self.imageView.frame.origin.y + yOffset;
-        if(newTopY > self.cropRect.origin.y) {
-            yOffset = self.cropRect.origin.y - self.imageView.frame.origin.y;
-        }
-    }   
-    if(xOffset || yOffset){
-        self.view.userInteractionEnabled = NO;
-        CGAffineTransform transform =
-        CGAffineTransformTranslate(self.imageView.transform,
-                                   xOffset/self.scale, yOffset/self.scale);
-        [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-            self.imageView.transform = transform;
-        } completion:^(BOOL finished) {
-            self.view.userInteractionEnabled = YES;
-        }];
+    CGRect r1 = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
+    Rectangle r2 = [self applyTransform:transform toRect:self.initialImageFrame];
+    
+    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(self.cropRect), CGRectGetMidY(self.cropRect));
+    t = CGAffineTransformRotate(t, -[self imageRotation]);
+    t = CGAffineTransformTranslate(t, -CGRectGetMidX(self.cropRect), -CGRectGetMidY(self.cropRect));
+    
+    Rectangle r3 = [self applyTransform:t toRectangle:r2];
+    
+    if(CGRectContainsRect([self CGRectFromRectangle:r3],r1)) {
+        self.validTransform = transform;
     }
 }
+
+
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
@@ -465,10 +471,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         CGPoint translation = [recognizer translationInView:self.imageView];
         CGAffineTransform transform = CGAffineTransformTranslate( self.imageView.transform, translation.x, translation.y);
         self.imageView.transform = transform;
+        [self checkBoundsWithTransform:transform];
 
         [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
     }
-
 }
 
 - (IBAction)handleRotation:(UIRotationGestureRecognizer*)recognizer
@@ -484,6 +490,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         transform = CGAffineTransformRotate(transform, recognizer.rotation);
         transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
         self.imageView.transform = transform;
+        [self checkBoundsWithTransform:transform];
 
         recognizer.rotation = 0;
     }
@@ -506,6 +513,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         self.imageView.transform = transform;
 
         recognizer.scale = 1;
+        
+        [self checkBoundsWithTransform:transform];
     }
 }
 
@@ -517,7 +526,11 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return YES;
 }
 
+
+
+
 # pragma mark Image Transformation
+
 
 - (void)transform:(CGAffineTransform*)transform andSize:(CGSize *)size forOrientation:(UIImageOrientation)orientation
 {
@@ -667,6 +680,67 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 {
 }
 
+#pragma mark - Util
+
+- (CGFloat) imageRotation
+{
+    CGAffineTransform t = self.imageView.transform;
+    return atan2f(t.b, t.a);
+}
+
+- (CGRect)boundingBoxForRect:(CGRect)rect rotatedByRadians:(CGFloat)angle
+{
+    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(rect), CGRectGetMidY(rect));
+    t = CGAffineTransformRotate(t,angle);
+    t = CGAffineTransformTranslate(t,-CGRectGetMidX(rect), -CGRectGetMidY(rect));
+    return CGRectApplyAffineTransform(rect, t);
+}
+
+- (Rectangle)RectangleFromCGRect:(CGRect)rect
+{
+    return (Rectangle) {
+        .tl = (CGPoint){rect.origin.x, rect.origin.y},
+        .tr = (CGPoint){CGRectGetMaxX(rect), rect.origin.y},
+        .br = (CGPoint){CGRectGetMaxX(rect), CGRectGetMaxY(rect)},
+        .bl = (CGPoint){rect.origin.x, CGRectGetMaxY(rect)}
+    };
+}
+
+-(CGRect)CGRectFromRectangle:(Rectangle)rect
+{
+    return (CGRect) {
+        .origin = rect.tl,
+        .size = (CGSize){.width = rect.tr.x - rect.tl.x, .height = rect.bl.y - rect.tl.y}
+    };
+}
+
+- (Rectangle)applyTransform:(CGAffineTransform)transform toRect:(CGRect)rect
+{
+    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(rect), CGRectGetMidY(rect));
+    t = CGAffineTransformConcat(self.imageView.transform, t);
+    t = CGAffineTransformTranslate(t,-CGRectGetMidX(rect), -CGRectGetMidY(rect));
+    
+    Rectangle r = [self RectangleFromCGRect:rect];
+    return (Rectangle) {
+        .tl = CGPointApplyAffineTransform(r.tl, t),
+        .tr = CGPointApplyAffineTransform(r.tr, t),
+        .br = CGPointApplyAffineTransform(r.br, t),
+        .bl = CGPointApplyAffineTransform(r.bl, t)
+    };
+}
+
+- (Rectangle)applyTransform:(CGAffineTransform)t toRectangle:(Rectangle)r
+{
+    return (Rectangle) {
+        .tl = CGPointApplyAffineTransform(r.tl, t),
+        .tr = CGPointApplyAffineTransform(r.tr, t),
+        .br = CGPointApplyAffineTransform(r.br, t),
+        .bl = CGPointApplyAffineTransform(r.bl, t)
+    };
+}
+
 
 
 @end
+
+
