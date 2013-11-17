@@ -1,7 +1,7 @@
 iOS Image Editor
 ================
 
-A iOS View Controller for image cropping. An alternative to the UIImagePickerController editor with extended features. Drop me a line if your're using this on your apps, I would like to know.
+A iOS View Controller for image cropping. An alternative to the UIImagePickerController editor with extended features and flexibility. Drop me a line if your're using this on your apps, I would like to know.
 
 Features
 --------
@@ -11,7 +11,6 @@ Features
 * Zoom and rotation centered on touch area
 * Double tap to reset
 * Handles EXIF orientations
-* Configurable
 * Plug-in your own interface
 
 
@@ -70,8 +69,7 @@ The width of the cropped image. If not defined, the width of the source image is
 The bounds for image scaling. If not defined, image zoom is unlimited.
 
 #### checkBounds
-Set to true to bound the image scale and pan so that you dont' get a black backround on the resulting image.
-This will work correctly only if rotation is not enabled. 
+Set to true to bound the image transform so that you dont' get a black backround on the resulting image.
 
 #### panEnabled, rotateEnabled, scaleEnabled, tapToResetEnabled
 BOOL property to enable/disable specific gestures
@@ -102,7 +100,7 @@ ChangeLog
 #### 1.1
 #### Features:
 
-* New <code>checkBounds</code> setting to bound the image scale and pan to avoid clear space (only if rotation is not enabled).
+* New <code>checkBounds</code> setting to bound the image scale and pan to avoid clear space.
 
 #### 1.1.1
 #### Features:
@@ -113,6 +111,12 @@ ChangeLog
 #### Bug fixes:
 
 * Support all EXIF orientation 
+
+#### 1.1.2
+
+#### Bug fixes:
+
+Bound check now works correctly with any transform including rotation.
 
 License
 ---------
