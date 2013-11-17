@@ -12,39 +12,6 @@ typedef struct {
 @property(assign,nonatomic) Rectangle rectangle3;
 @end
 
-
-@implementation TestView
-
-- (void)drawRectangle:(Rectangle)rectangle inContext:(CGContextRef)context
-{
-    CGContextMoveToPoint(context, rectangle.tl.x, rectangle.tl.y);
-    CGContextAddLineToPoint(context, rectangle.tr.x, rectangle.tr.y);
-    CGContextAddLineToPoint(context, rectangle.br.x, rectangle.br.y);
-    CGContextAddLineToPoint(context, rectangle.bl.x, rectangle.bl.y);
-    CGContextAddLineToPoint(context, rectangle.tl.x, rectangle.tl.y);
-    CGContextStrokePath(context);
-}
-
-- (void)drawRect:(CGRect)rect
-{
-    [super drawRect:rect];
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextSetStrokeColorWithColor(context, [UIColor redColor].CGColor);
-    CGContextSetLineWidth(context, 5);
-    CGContextStrokeRect(context, self.rectangle);
-    
-    CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
-    CGContextSetLineWidth(context, 10);
-    [self drawRectangle:self.rectangle2 inContext:context];
-    
-    CGContextSetStrokeColorWithColor(context, [UIColor blueColor].CGColor);
-    CGContextSetLineWidth(context, 2);
-    [self drawRectangle:self.rectangle3 inContext:context];
-}
-
-@end
-
-
 static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
 static const CGFloat kDefaultCropWidth = 320;
@@ -448,11 +415,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                     CGAffineTransform transform =  CGAffineTransformTranslate(self.imageView.transform, deltaX, deltaY);
                     transform = CGAffineTransformScale(transform, scale/self.scale , scale/self.scale);
                     transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
+                    [self checkBoundsWithTransform:transform];
                     self.view.userInteractionEnabled = NO;
                     [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                        if([self checkBoundsWithTransform:transform]) {
-                            self.validTransform = transform;
-                        }
                         self.imageView.transform = self.validTransform;
                     } completion:^(BOOL finished) {
                         self.view.userInteractionEnabled = YES;
@@ -469,7 +434,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
                     self.imageView.transform = self.validTransform;
                 }
-                //if(self.checkBounds) [self doCheckBounds];
             }
         } break;
         default:
@@ -478,50 +442,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return handle;
 }
 
--(void)doCheckBounds {
-    CGFloat yOffset = 0;
-    CGFloat xOffset = 0;
-    
-    if(self.imageView.frame.origin.x > self.cropRect.origin.x){
-        xOffset =  - (self.imageView.frame.origin.x - self.cropRect.origin.x);
-        CGFloat newRightX = CGRectGetMaxX(self.imageView.frame) + xOffset;
-        if(newRightX < CGRectGetMaxX(self.cropRect)) {
-            xOffset =  CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
-        }
-    } else if(CGRectGetMaxX(self.imageView.frame) < CGRectGetMaxX(self.cropRect)){
-        xOffset = CGRectGetMaxX(self.cropRect) - CGRectGetMaxX(self.imageView.frame);
-        CGFloat newLeftX = self.imageView.frame.origin.x + xOffset;
-        if(newLeftX > self.cropRect.origin.x) {
-            xOffset = self.cropRect.origin.x - self.imageView.frame.origin.x;
-        }
-    }
-    if (self.imageView.frame.origin.y > self.cropRect.origin.y) {
-        yOffset = - (self.imageView.frame.origin.y - self.cropRect.origin.y);
-        CGFloat newBottomY = CGRectGetMaxY(self.imageView.frame) + yOffset;
-        if(newBottomY < CGRectGetMaxY(self.cropRect)) {
-            yOffset = CGRectGetMaxY(self.cropRect) - CGRectGetMaxY(self.imageView.frame);
-        }
-    } else if(CGRectGetMaxY(self.imageView.frame) < CGRectGetMaxY(self.cropRect)){
-        yOffset = CGRectGetMaxY(self.cropRect) - CGRectGetMaxY(self.imageView.frame);
-        CGFloat newTopY = self.imageView.frame.origin.y + yOffset;
-        if(newTopY > self.cropRect.origin.y) {
-            yOffset = self.cropRect.origin.y - self.imageView.frame.origin.y;
-        }
-    }   
-    if(xOffset || yOffset){
-        self.view.userInteractionEnabled = NO;
-        CGAffineTransform transform =
-        CGAffineTransformTranslate(self.imageView.transform,
-                                   xOffset/self.scale, yOffset/self.scale);
-        [UIView animateWithDuration:kAnimationIntervalTransform delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-            self.imageView.transform = transform;
-        } completion:^(BOOL finished) {
-            self.view.userInteractionEnabled = YES;
-        }];
-    }
-}
 
-- (BOOL)checkBoundsWithTransform:(CGAffineTransform)transform
+- (void)checkBoundsWithTransform:(CGAffineTransform)transform
 {
     CGRect r1 = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
     Rectangle r2 = [self applyTransform:transform toRect:self.initialImageFrame];
@@ -532,25 +454,12 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     
     Rectangle r3 = [self applyTransform:t toRectangle:r2];
     
-    return CGRectContainsRect([self CGRectFromRectangle:r3],r1);
+    if(CGRectContainsRect([self CGRectFromRectangle:r3],r1)) {
+        self.validTransform = transform;
+    }
 }
 
-//- (void)updateTestFrames
-//{
-//    TestView *tview =  (TestView*)self.view;
-//    tview.rectangle = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
-//    tview.rectangle2 = [self applyTransform:self.imageView.transform toRect:self.initialImageFrame];
-//    
-//    CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(self.cropRect), CGRectGetMidY(self.cropRect));
-//    t = CGAffineTransformRotate(t, -[self imageRotation]);
-//    t = CGAffineTransformTranslate(t, -CGRectGetMidX(self.cropRect), -CGRectGetMidY(self.cropRect));
-//    
-//    tview.rectangle3 = [self applyTransform:t toRectangle:tview.rectangle2];
-//    
-//    NSLog(@"Bound check: %d",CGRectContainsRect([self CGRectFromRectangle:tview.rectangle3],tview.rectangle));
-//    [tview setNeedsDisplay];
-//    
-//}
+
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
 {
@@ -558,13 +467,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         CGPoint translation = [recognizer translationInView:self.imageView];
         CGAffineTransform transform = CGAffineTransformTranslate( self.imageView.transform, translation.x, translation.y);
         self.imageView.transform = transform;
-        if([self checkBoundsWithTransform:self.imageView.transform]) {
-            self.validTransform = transform;
-        }
+        [self checkBoundsWithTransform:transform];
 
         [recognizer setTranslation:CGPointMake(0, 0) inView:self.frameView];
     }
-//    [self updateTestFrames];
 }
 
 - (IBAction)handleRotation:(UIRotationGestureRecognizer*)recognizer
@@ -580,14 +486,11 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         transform = CGAffineTransformRotate(transform, recognizer.rotation);
         transform = CGAffineTransformTranslate(transform, -deltaX, -deltaY);
         self.imageView.transform = transform;
-        
-        if([self checkBoundsWithTransform:self.imageView.transform]) {
-            self.validTransform = transform;
-        }
+        [self checkBoundsWithTransform:transform];
 
         recognizer.rotation = 0;
     }
-//    [self updateTestFrames];
+
 }
 
 - (IBAction)handlePinch:(UIPinchGestureRecognizer *)recognizer
@@ -607,11 +510,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
         recognizer.scale = 1;
         
-        if([self checkBoundsWithTransform:self.imageView.transform]) {
-            self.validTransform = transform;
-        }
+        [self checkBoundsWithTransform:transform];
     }
-//    [self updateTestFrames];
 }
 
 - (IBAction)handleTap:(UITapGestureRecognizer *)recogniser {
