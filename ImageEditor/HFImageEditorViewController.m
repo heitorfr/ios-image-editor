@@ -7,6 +7,8 @@ typedef struct {
 } Rectangle;
 
 
+
+
 static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
 static const CGFloat kDefaultCropWidth = 320;
@@ -20,24 +22,23 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 #pragma mark - HFImageEditorViewController
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 @interface HFImageEditorViewController ()
-@property (nonatomic,retain) UIImageView *imageView;
-@property (retain, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
-@property (retain, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
-@property (retain, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
-@property (retain, nonatomic) IBOutlet UITapGestureRecognizer *tapRecognizer;
-@property (nonatomic,retain) IBOutlet UIView<HFImageEditorFrame> *frameView;
 
-@property(nonatomic,assign) NSUInteger gestureCount;
-@property(nonatomic,assign) CGPoint touchCenter;
-@property(nonatomic,assign) CGPoint rotationCenter;
-@property(nonatomic,assign) CGPoint scaleCenter;
-@property(nonatomic,assign) CGFloat scale;
+@property (strong, nonatomic) UIImageView *imageView;
+@property (strong, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
+@property (strong, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
+@property (strong, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
+@property (strong, nonatomic) IBOutlet UITapGestureRecognizer *tapRecognizer;
+@property (strong, nonatomic) IBOutlet UIView<HFImageEditorFrame> *frameView;
 
+@property(nonatomic, assign) NSUInteger gestureCount;
+@property(nonatomic, assign) CGPoint touchCenter;
+@property(nonatomic, assign) CGPoint rotationCenter;
+@property(nonatomic, assign) CGPoint scaleCenter;
+@property(nonatomic, assign) CGFloat scale;
 @property(nonatomic, assign) CGRect initialImageFrame;
 @property(nonatomic, assign) CGAffineTransform validTransform;
 
 @end
-
 
 
 @implementation HFImageEditorViewController
@@ -62,25 +63,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return self;
 }
 
-#if ! __has_feature(objc_arc)
-- (void) dealloc
-{
-    [_imageView release];
-    [_frameView release];
-    [_doneCallback release];
-    [_sourceImage release];
-    [_previewImage release];
-    [_panRecognizer release];
-    [_rotationRecognizer release];
-    [_pinchRecognizer release];
-    [_tapRecognizer release];
-    [super dealloc];
-}
-#endif
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Properties
-////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)setCropRect:(CGRect)cropRect
 {
     self.frameView.cropRect = cropRect;
@@ -88,7 +70,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 - (CGRect)cropRect
 {
-    if(self.frameView.cropRect.size.width == 0 || self.frameView.cropRect.size.height == 0) {
+    if(self.frameView.cropRect.size.width == 0 || self.frameView.cropRect.size.height == 0)
+    {
         self.frameView.cropRect = CGRectMake((self.frameView.bounds.size.width-kDefaultCropWidth)/2,
                                              (self.frameView.bounds.size.height-kDefaultCropHeight)/2,
                                              kDefaultCropWidth,kDefaultCropHeight);
@@ -110,24 +93,25 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 - (UIImage *)previewImage
 {
-    if(_previewImage == nil && _sourceImage != nil) {
-        if(self.sourceImage.size.height > kMaxUIImageSize || self.sourceImage.size.width > kMaxUIImageSize) {
+    if(_previewImage == nil && _sourceImage != nil)
+    {
+        if(self.sourceImage.size.height > kMaxUIImageSize || self.sourceImage.size.width > kMaxUIImageSize)
+        {
             CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
             CGSize size;
-            if(aspect >= 1.0) { //square or portrait
+            if(aspect >= 1.0) //square or portrait
+            {
                 size = CGSizeMake(kPreviewImageSize,kPreviewImageSize*aspect);
-            } else { // landscape
+            }
+            else // landscape
+            {
                 size = CGSizeMake(kPreviewImageSize,kPreviewImageSize*aspect);
             }
             _previewImage = [self scaledImage:self.sourceImage  toSize:size withQuality:kCGInterpolationLow];
-#if ! __has_feature(objc_arc)
-            [_previewImage retain];
-#endif
-        } else {
+        }
+        else
+        {
             _previewImage = _sourceImage;
-#if ! __has_feature(objc_arc)
-            [_sourceImage retain];
-#endif
         }
     }
     return  _previewImage;
@@ -135,13 +119,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 - (void)setSourceImage:(UIImage *)sourceImage
 {
-    if(sourceImage != _sourceImage) {
-#if ! __has_feature(objc_arc)
-        [_sourceImage release];
-        _sourceImage = [sourceImage retain];
-#else 
+    if(sourceImage != _sourceImage)
+    {
         _sourceImage = sourceImage;
-#endif
         self.previewImage = nil;
     }
 }
@@ -187,10 +167,8 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return self.tapToResetEnabled;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 -(void)reset:(BOOL)animated
 {
     CGFloat w = 0.0f;
@@ -227,9 +205,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark View Lifecycle
-////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -328,7 +304,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
             CGImageRelease(resultRef);
             self.view.userInteractionEnabled = YES;
             if(self.doneCallback) {
-                self.doneCallback(transform, NO);
+                self.doneCallback(self, transform, NO);
             }
             [self endTransformHook];
         });
@@ -340,7 +316,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 - (IBAction)cancelAction:(id)sender
 {
     if(self.doneCallback) {
-        self.doneCallback(nil, YES);
+        self.doneCallback(self, nil, YES);
     }
 }
 

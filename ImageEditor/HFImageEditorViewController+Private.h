@@ -7,6 +7,8 @@
 - (void)startTransformHook;
 - (void)endTransformHook;
 
+- (IBAction)doneAction:(id)sender;
+
 @end
 
 

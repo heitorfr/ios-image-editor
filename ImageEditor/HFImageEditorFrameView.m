@@ -70,19 +70,4 @@
     }
 }
 
-/*
-- (void)drawRect:(CGRect)rect
-{
-   CGContextRef context = UIGraphicsGetCurrentContext();
-
-    [[UIColor blackColor] setFill];
-    UIRectFill(rect);
-    CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] colorWithAlphaComponent:0.5].CGColor);
-    CGContextStrokeRect(context, self.cropRect);
-    [[UIColor clearColor] setFill];
-    UIRectFill(CGRectInset(self.cropRect, 1, 1));
-
-}
-*/
-
 @end
