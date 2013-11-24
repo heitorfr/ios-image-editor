@@ -7,7 +7,7 @@
 
 @class  HFImageEditorViewController;
 
-typedef void(^HFImageEditorDoneCallback)(UIImage *image, BOOL canceled);
+typedef void(^HFImageEditorDoneCallback)(HFImageEditorViewController* editor, UIImage *image, BOOL canceled);
 
 @interface HFImageEditorViewController : UIViewController<UIGestureRecognizerDelegate>
 

@@ -21,7 +21,9 @@
     imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self addSubview:imageView];
     self.imageView = imageView;
+#if ! __has_feature(objc_arc)
     [imageView release];
+#endif
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -42,12 +44,13 @@
     return self;
 }
 
+#if ! __has_feature(objc_arc)
 - (void)dealloc
 {
     [_imageView release];
     [super dealloc];
 }
-
+#endif
 
 - (void)setCropRect:(CGRect)cropRect
 {
@@ -66,20 +69,5 @@
         UIGraphicsEndImageContext();
     }
 }
-
-/*
-- (void)drawRect:(CGRect)rect
-{
-   CGContextRef context = UIGraphicsGetCurrentContext();
-
-    [[UIColor blackColor] setFill];
-    UIRectFill(rect);
-    CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] colorWithAlphaComponent:0.5].CGColor);
-    CGContextStrokeRect(context, self.cropRect);
-    [[UIColor clearColor] setFill];
-    UIRectFill(CGRectInset(self.cropRect, 1, 1));
-
-}
-*/
 
 @end
