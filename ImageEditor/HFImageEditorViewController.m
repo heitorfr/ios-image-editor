@@ -42,24 +42,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 @implementation HFImageEditorViewController
 
-@synthesize doneCallback = _doneCallback;
-@synthesize sourceImage = _sourceImage;
-@synthesize previewImage = _previewImage;
-@synthesize outputWidth = _outputWidth;
-@synthesize frameView = _frameView;
-@synthesize imageView = _imageView;
-@synthesize panRecognizer = _panRecognizer;
-@synthesize rotationRecognizer = _rotationRecognizer;
-@synthesize tapRecognizer = _tapRecognizer;
-@synthesize pinchRecognizer = _pinchRecognizer;
-@synthesize touchCenter = _touchCenter;
-@synthesize rotationCenter = _rotationCenter;
-@synthesize scaleCenter = _scaleCenter;
-@synthesize scale = _scale;
-@synthesize minimumScale = _minimumScale;
-@synthesize maximumScale = _maximumScale;
-@synthesize gestureCount = _gestureCount;
-
 @dynamic panEnabled;
 @dynamic rotateEnabled;
 @dynamic scaleEnabled;
@@ -80,9 +62,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     return self;
 }
 
+#if ! __has_feature(objc_arc)
 - (void) dealloc
 {
-
     [_imageView release];
     [_frameView release];
     [_doneCallback release];
@@ -94,6 +76,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     [_tapRecognizer release];
     [super dealloc];
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
@@ -136,9 +119,15 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
             } else { // landscape
                 size = CGSizeMake(kPreviewImageSize,kPreviewImageSize*aspect);
             }
-            _previewImage = [[self scaledImage:self.sourceImage  toSize:size withQuality:kCGInterpolationLow] retain];
+            _previewImage = [self scaledImage:self.sourceImage  toSize:size withQuality:kCGInterpolationLow];
+#if ! __has_feature(objc_arc)
+            [_previewImage retain];
+#endif
         } else {
-            _previewImage = [_sourceImage retain];
+            _previewImage = _sourceImage;
+#if ! __has_feature(objc_arc)
+            [_sourceImage retain];
+#endif
         }
     }
     return  _previewImage;
@@ -147,14 +136,15 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 - (void)setSourceImage:(UIImage *)sourceImage
 {
     if(sourceImage != _sourceImage) {
+#if ! __has_feature(objc_arc)
         [_sourceImage release];
         _sourceImage = [sourceImage retain];
+#else 
+        _sourceImage = sourceImage;
+#endif
         self.previewImage = nil;
     }
 }
-
-
-
 
 - (void)setPanEnabled:(BOOL)panEnabled
 {
@@ -248,8 +238,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     UIImageView *imageView = [[UIImageView alloc] init];
     [self.view insertSubview:imageView belowSubview:self.frameView];
     self.imageView = imageView;
+#if ! __has_feature(objc_arc)
     [imageView release];
-    
+#endif
     [self.view setMultipleTouchEnabled:YES];
 
     self.panRecognizer.cancelsTouchesInView = NO;
