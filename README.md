@@ -17,13 +17,13 @@ Features
 Usage
 -----
 
-<pre><code>HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
+<pre><code class="objc">
+HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
 
 imageEditor.sourceImage = image;
 imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
     ...
 }
-
 </pre></code>
 
 
@@ -37,7 +37,7 @@ The full resolution UIImage to crop
 
 For images larger than 1024 wide or 1024 height, the image editor will create a preview image before the view is shown. If a preview is already available you can get a faster transition by setting the preview propety. For instance, if the image was fetched using the <code>UIImagePickerController</code>:
 
-<pre><code>
+<pre><code class="objc">
 UIImage *image =  [info objectForKey:UIImagePickerControllerOriginalImage];
 NSURL *assetURL = [info objectForKey:UIImagePickerControllerReferenceURL];
 
@@ -98,25 +98,31 @@ ChangeLog
 ---------
 
 #### 1.1
-#### Features:
+##### Features:
 
 * New <code>checkBounds</code> setting to bound the image scale and pan to avoid clear space.
 
 #### 1.1.1
-#### Features:
+##### Features:
 
 * Crop rectangle does not have to be centered - use cropRect to specify the crop area instead of cropSize
 * One step transform - orientation fix and cropping on the same operation for improved memory footprint and speed
 
-#### Bug fixes:
+##### Bug fixes:
 
 * Support all EXIF orientation 
 
 #### 1.1.2
 
-#### Bug fixes:
+##### Bug fixes:
 
 Bound check now works correctly with any transform including rotation.
+
+#### 1.1.3
+
+ios-image-editor is now using ARC
+
+#### 
 
 License
 ---------

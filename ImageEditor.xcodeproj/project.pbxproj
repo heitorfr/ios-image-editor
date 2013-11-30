@@ -280,6 +280,7 @@
 		EC23EB0A15ECC5610051EA9E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ImageEditorDemo/ImageEditor-Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/ImageEditorDemo/ImageEditor-Info.plist";
@@ -292,6 +293,7 @@
 		EC23EB0B15ECC5610051EA9E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ImageEditorDemo/ImageEditor-Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/ImageEditorDemo/ImageEditor-Info.plist";

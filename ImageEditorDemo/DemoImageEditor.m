@@ -20,11 +20,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [_saveButton release];
-    [super dealloc];
-}
 
 - (void)viewDidUnload
 {
