@@ -2,6 +2,6 @@
 
 @interface DemoImageEditor : HFImageEditorViewController
 
-@property(nonatomic,retain) IBOutlet UIBarButtonItem *saveButton;
+@property(nonatomic,strong) IBOutlet UIBarButtonItem *saveButton;
 
 @end

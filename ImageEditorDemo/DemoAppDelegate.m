@@ -3,26 +3,15 @@
 #import "DemoImageEditor.h"
 
 @interface DemoAppDelegate()
-@property(nonatomic,retain) DemoImageEditor *imageEditor;
-@property(nonatomic,retain) ALAssetsLibrary *library;
+@property(nonatomic,strong) DemoImageEditor *imageEditor;
+@property(nonatomic,strong) ALAssetsLibrary *library;
 @end
 
 @implementation DemoAppDelegate
 
-@synthesize library = _library;
-@synthesize imageEditor = _imageEditor;
-
-- (void)dealloc
-{
-    [_library release];
-    [_imageEditor release];
-    [_window release];
-    [super dealloc];
-}
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
     //if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
@@ -31,18 +20,17 @@
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     picker.delegate = self;
     self.window.rootViewController = picker;
-    [picker release];
     
-    self.library = [[[ALAssetsLibrary alloc] init] autorelease];
-    self.imageEditor = [[[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil] autorelease];
+    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+    self.imageEditor = [[DemoImageEditor alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
     self.imageEditor.checkBounds = YES;
     self.imageEditor.rotateEnabled = YES;
+    self.library = library;
     
     self.imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {
-          
-            [self.library writeImageToSavedPhotosAlbum:[editedImage CGImage]
-                                      orientation:editedImage.imageOrientation
+            [library writeImageToSavedPhotosAlbum:[editedImage CGImage]
+                                      orientation:(ALAssetOrientation)editedImage.imageOrientation
                                   completionBlock:^(NSURL *assetURL, NSError *error){
                                       if (error) {
                                           UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error Saving"
@@ -51,7 +39,6 @@
                                                                                 cancelButtonTitle:@"Ok"
                                                                                 otherButtonTitles: nil];
                                           [alert show];
-                                          [alert release];
                                       }
                                   }];
         }
@@ -93,7 +80,6 @@
                                           cancelButtonTitle:@"Ok"
                                           otherButtonTitles: nil];
     [alert show];
-    [alert release];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
