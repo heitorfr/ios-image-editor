@@ -21,12 +21,12 @@ static const NSTimeInterval kAnimationIntervalReset = 0.25;
 static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 @interface HFImageEditorViewController ()
-@property (nonatomic,strong) UIImageView *imageView;
-@property (strong, nonatomic) IBOutlet UIPanGestureRecognizer *panRecognizer;
-@property (strong, nonatomic) IBOutlet UIRotationGestureRecognizer *rotationRecognizer;
-@property (strong, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
-@property (strong, nonatomic) IBOutlet UITapGestureRecognizer *tapRecognizer;
-@property (nonatomic,strong) IBOutlet UIView<HFImageEditorFrame> *frameView;
+@property (nonatomic,strong) UIPanGestureRecognizer *panRecognizer;
+@property (nonatomic,strong) UIRotationGestureRecognizer *rotationRecognizer;
+@property (nonatomic,strong) UIPinchGestureRecognizer *pinchRecognizer;
+@property (nonatomic,strong) UITapGestureRecognizer *tapRecognizer;
+@property (nonatomic,weak) UIImageView *imageView;
+@property (nonatomic,weak) IBOutlet UIView<HFImageEditorFrame> *frameView;
 
 @property(nonatomic,assign) NSUInteger gestureCount;
 @property(nonatomic,assign) CGPoint touchCenter;
@@ -34,7 +34,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @property(nonatomic,assign) CGPoint scaleCenter;
 @property(nonatomic,assign) CGFloat scale;
 
-// Test
 @property(nonatomic, assign) CGRect initialImageFrame;
 @property(nonatomic, assign) CGAffineTransform validTransform;
 
@@ -44,23 +43,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 @implementation HFImageEditorViewController
 
-@synthesize doneCallback = _doneCallback;
-@synthesize sourceImage = _sourceImage;
-@synthesize previewImage = _previewImage;
-@synthesize outputWidth = _outputWidth;
-@synthesize frameView = _frameView;
-@synthesize imageView = _imageView;
-@synthesize panRecognizer = _panRecognizer;
-@synthesize rotationRecognizer = _rotationRecognizer;
-@synthesize tapRecognizer = _tapRecognizer;
-@synthesize pinchRecognizer = _pinchRecognizer;
-@synthesize touchCenter = _touchCenter;
-@synthesize rotationCenter = _rotationCenter;
-@synthesize scaleCenter = _scaleCenter;
-@synthesize scale = _scale;
-@synthesize minimumScale = _minimumScale;
-@synthesize maximumScale = _maximumScale;
-@synthesize gestureCount = _gestureCount;
 
 @dynamic panEnabled;
 @dynamic rotateEnabled;
@@ -69,18 +51,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 @dynamic cropBoundsInSourceImage;
 @dynamic cropRect;
 @dynamic cropSize;
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if(self) {
-        _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-        _rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotation:)];
-        _pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
-        _tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    }
-    return self;
-}
 
 
 #pragma mark Properties
@@ -235,27 +205,30 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     
     [self.view setMultipleTouchEnabled:YES];
 
-    self.panRecognizer.cancelsTouchesInView = NO;
-    self.panRecognizer.delegate = self;
-    [self.frameView addGestureRecognizer:self.panRecognizer];
-    self.rotationRecognizer.cancelsTouchesInView = NO;
-    self.rotationRecognizer.delegate = self;
-    [self.frameView addGestureRecognizer:self.rotationRecognizer];
-    self.pinchRecognizer.cancelsTouchesInView = NO;
-    self.pinchRecognizer.delegate = self;
-    [self.frameView addGestureRecognizer:self.pinchRecognizer];
-    self.tapRecognizer.numberOfTapsRequired = 2;
-    [self.frameView addGestureRecognizer:self.tapRecognizer];
+    UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+    panRecognizer.cancelsTouchesInView = NO;
+    panRecognizer.delegate = self;
+    [self.frameView addGestureRecognizer:panRecognizer];
+    self.panRecognizer = panRecognizer;
+
+    UIRotationGestureRecognizer *rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotation:)];
+    rotationRecognizer.cancelsTouchesInView = NO;
+    rotationRecognizer.delegate = self;
+    [self.frameView addGestureRecognizer:rotationRecognizer];
+    self.rotationRecognizer = rotationRecognizer;
+
+    UIPinchGestureRecognizer *pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
+    pinchRecognizer.cancelsTouchesInView = NO;
+    pinchRecognizer.delegate = self;
+    [self.frameView addGestureRecognizer:pinchRecognizer];
+    self.pinchRecognizer = pinchRecognizer;
+
+    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    tapRecognizer.numberOfTapsRequired = 2;
+    [self.frameView addGestureRecognizer:tapRecognizer];
+    self.tapRecognizer = tapRecognizer;
 }
 
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    
-    [self setFrameView:nil];
-    [self setImageView:nil];
-}
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
