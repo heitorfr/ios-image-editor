@@ -57,10 +57,10 @@ HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc]
 The callback block called when the image editor completes. Returns the cropped image and a BOOL that specifies if completion results from a <code>done</code> or <code>cancel</code> actions.
 
 #### cropSize
-A CGSize specifying the width and height of the crop area in screen coordinates.
-
+A CGSize specifying the width and height of the crop area in screen coordinates. NOTE: Currently <code>HFImageEditorViewController</code> is expecting <code>cropSize</code> to be set only after its view and the <code>frameView</code> outlet have been set. If you subclass <code>HFImageEditorViewController</code> you can do it in viewDidLoad; if not, you should set it after adding <code>HFImageEditorViewController</code> to the view controller hierarchy.
+ 
 #### cropRect
-A CGRect specifying the crop area in screen coordinates. Use instead of `cropSize` if the crop area is not centered.
+A CGRect specifying the crop area in screen coordinates. Use instead of `cropSize` if the crop area is not centered. NOTE: Currently <code>HFImageEditorViewController</code> is expecting <code>cropRect</code> to be set only after its view and the <code>frameView</code> outlet have been set. If you subclass <code>HFImageEditorViewController</code> you can do it in viewDidLoad; if not, you should set it after adding <code>HFImageEditorViewController</code> to the view controller hierarchy.
 
 #### outputWidth
 The width of the cropped image. If not defined, the width of the source image is assumed.
@@ -121,6 +121,11 @@ Bound check now works correctly with any transform including rotation.
 #### 1.1.3
 
 ios-image-editor is now using ARC
+
+#### 1.1.4
+
+##### Bug fixes:
+<code>rotationEnabled</code>, <code>panEnabled</code>, <code>scaleEnabled</code>, <code>tapToResetEnabled</code> where being ignored if set before the editor view was loaded.
 
 #### 
 
