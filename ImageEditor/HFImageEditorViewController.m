@@ -1,16 +1,11 @@
 #import "HFImageEditorViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
+
 typedef struct {
     CGPoint tl,tr,bl,br;
 } Rectangle;
 
-@interface TestView : UIView
-
-@property(assign,nonatomic) CGRect rectangle;
-@property(assign,nonatomic) Rectangle rectangle2;
-@property(assign,nonatomic) Rectangle rectangle3;
-@end
 
 static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
@@ -20,6 +15,10 @@ static const CGFloat kBoundingBoxInset = 15;
 static const NSTimeInterval kAnimationIntervalReset = 0.25;
 static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - HFImageEditorViewController
+////////////////////////////////////////////////////////////////////////////////////////////////////
 @interface HFImageEditorViewController ()
 @property (nonatomic,strong) UIPanGestureRecognizer *panRecognizer;
 @property (nonatomic,strong) UIRotationGestureRecognizer *rotationRecognizer;
@@ -43,18 +42,48 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 @implementation HFImageEditorViewController
 
-
-@dynamic panEnabled;
-@dynamic rotateEnabled;
-@dynamic scaleEnabled;
-@dynamic tapToResetEnabled;
 @dynamic cropBoundsInSourceImage;
 @dynamic cropRect;
 @dynamic cropSize;
 
+@synthesize tapToResetEnabled = _tapToResetEnabled;
+@synthesize panEnabled = _panEnabled;
+@synthesize scaleEnabled = _scaleEnabled;
+@synthesize rotateEnabled = _rotateEnabled;
 
-#pragma mark Properties
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - Initialization
+////////////////////////////////////////////////////////////////////////////////////////////////////
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if(self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if(self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (void)commonInit
+{
+    self.tapToResetEnabled = YES;
+    self.panEnabled = YES;
+    self.scaleEnabled = YES;
+    self.rotateEnabled = YES;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -Properties
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)setCropRect:(CGRect)cropRect
 {
     self.frameView.cropRect = cropRect;
@@ -114,48 +143,32 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 - (void)setPanEnabled:(BOOL)panEnabled
 {
+    _panEnabled = panEnabled;
     self.panRecognizer.enabled = panEnabled;
 }
 
-- (BOOL)panEnabled
-{
-    return self.panRecognizer.enabled;
-}
 
 - (void)setScaleEnabled:(BOOL)scaleEnabled
 {
+    _scaleEnabled = scaleEnabled;
     self.pinchRecognizer.enabled = scaleEnabled;
 }
 
-- (BOOL)scaleEnabled
-{
-    return self.pinchRecognizer.enabled;
-}
-
-
 - (void)setRotateEnabled:(BOOL)rotateEnabled
 {
+    _rotateEnabled = rotateEnabled;
     self.rotationRecognizer.enabled = rotateEnabled;
-}
-
-- (BOOL)rotateEnabled
-{
-    return self.rotationRecognizer.enabled;
 }
 
 - (void)setTapToResetEnabled:(BOOL)tapToResetEnabled
 {
+    _tapToResetEnabled = tapToResetEnabled;
     self.tapRecognizer.enabled = tapToResetEnabled;
 }
 
-- (BOOL)tapToResetEnabled
-{
-    return self.tapToResetEnabled;
-}
-
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)reset:(BOOL)animated
 {
     CGFloat w = 0.0f;
@@ -192,8 +205,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark View Lifecycle
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -208,23 +222,27 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
     panRecognizer.cancelsTouchesInView = NO;
     panRecognizer.delegate = self;
+    panRecognizer.enabled = self.panEnabled;
     [self.frameView addGestureRecognizer:panRecognizer];
     self.panRecognizer = panRecognizer;
 
     UIRotationGestureRecognizer *rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotation:)];
     rotationRecognizer.cancelsTouchesInView = NO;
     rotationRecognizer.delegate = self;
+    rotationRecognizer.enabled = self.rotateEnabled;
     [self.frameView addGestureRecognizer:rotationRecognizer];
     self.rotationRecognizer = rotationRecognizer;
 
     UIPinchGestureRecognizer *pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
     pinchRecognizer.cancelsTouchesInView = NO;
     pinchRecognizer.delegate = self;
+    pinchRecognizer.enabled = self.scaleEnabled;
     [self.frameView addGestureRecognizer:pinchRecognizer];
     self.pinchRecognizer = pinchRecognizer;
 
     UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
     tapRecognizer.numberOfTapsRequired = 2;
+    tapRecognizer.enabled = self.tapToResetEnabled;
     [self.frameView addGestureRecognizer:tapRecognizer];
     self.tapRecognizer = tapRecognizer;
 }
@@ -261,8 +279,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Actions
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (IBAction)resetAction:(id)sender
 {
     [self reset:NO];
@@ -308,8 +327,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Touches
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)handleTouches:(NSSet*)touches
 {
     self.touchCenter = CGPointZero;
@@ -485,10 +505,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 # pragma mark Image Transformation
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)transform:(CGAffineTransform*)transform andSize:(CGSize *)size forOrientation:(UIImageOrientation)orientation
 {
     *transform = CGAffineTransformIdentity;
@@ -627,8 +646,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Subclass Hooks
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)startTransformHook
 {
 }
@@ -637,8 +657,9 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 {
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - Util
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 - (CGFloat) imageRotation
 {
     CGAffineTransform t = self.imageView.transform;

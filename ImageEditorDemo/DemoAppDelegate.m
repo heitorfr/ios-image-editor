@@ -30,6 +30,7 @@
     self.imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
         if(!canceled) {
             [library writeImageToSavedPhotosAlbum:[editedImage CGImage]
+
                                       orientation:(ALAssetOrientation)editedImage.imageOrientation
                                   completionBlock:^(NSURL *assetURL, NSError *error){
                                       if (error) {
