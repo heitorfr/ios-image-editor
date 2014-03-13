@@ -3,6 +3,7 @@
 @protocol HFImageEditorFrame
 @required
 @property(nonatomic,assign) CGRect cropRect;
+@property(nonatomic,assign) BOOL useCircularImage;
 @end
 
 @class  HFImageEditorViewController;
@@ -19,7 +20,6 @@ typedef void(^HFImageEditorDoneCallback)(UIImage *image, BOOL canceled);
 @property(nonatomic,assign) CGFloat outputWidth;
 @property(nonatomic,assign) CGFloat minimumScale;
 @property(nonatomic,assign) CGFloat maximumScale;
-
 @property(nonatomic,assign) BOOL panEnabled;
 @property(nonatomic,assign) BOOL rotateEnabled;
 @property(nonatomic,assign) BOOL scaleEnabled;

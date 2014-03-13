@@ -10,7 +10,7 @@
 
 @synthesize cropRect = _cropRect;
 @synthesize imageView  = _imageView;
-
+@synthesize useCircularImage = _useCircularImage;
 
 - (void) initialize
 {
@@ -27,6 +27,15 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
+        [self initialize];
+    }
+    return self;
+}
+
+- (id)initWithFrame:(CGRect)frame useCircularImage:(BOOL)useCircularImage {
+    self = [super initWithFrame:frame];
+    if (self) {
+        _useCircularImage = useCircularImage;
         [self initialize];
     }
     return self;
@@ -51,29 +60,38 @@
         CGContextRef context = UIGraphicsGetCurrentContext();
         [[UIColor blackColor] setFill];
         UIRectFill(self.bounds);
-        CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] colorWithAlphaComponent:0.5].CGColor);
-        CGContextStrokeRect(context, cropRect);
-        [[UIColor clearColor] setFill];
-        UIRectFill(CGRectInset(cropRect, 1, 1));
+        
+        if ( _useCircularImage ) {
+            CGContextAddEllipseInRect(context, _cropRect);
+            CGContextClip(context);
+        }
+        
+        CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] colorWithAlphaComponent:0.9].CGColor);
+        CGContextSetFillColorWithColor(context, [UIColor clearColor].CGColor);
+        UIRectFill(_cropRect);
+        
+        if ( !_useCircularImage ) CGContextStrokeRect(context, _cropRect);
+        else CGContextStrokeEllipseInRect(context, CGRectInset(_cropRect, 1, 1));
+        
         self.imageView.image = UIGraphicsGetImageFromCurrentImageContext();
-
+        
         UIGraphicsEndImageContext();
     }
 }
 
 /*
-- (void)drawRect:(CGRect)rect
-{
-   CGContextRef context = UIGraphicsGetCurrentContext();
-
-    [[UIColor blackColor] setFill];
-    UIRectFill(rect);
-    CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] colorWithAlphaComponent:0.5].CGColor);
-    CGContextStrokeRect(context, self.cropRect);
-    [[UIColor clearColor] setFill];
-    UIRectFill(CGRectInset(self.cropRect, 1, 1));
-
-}
-*/
+ - (void)drawRect:(CGRect)rect
+ {
+ CGContextRef context = UIGraphicsGetCurrentContext();
+ 
+ [[UIColor blackColor] setFill];
+ UIRectFill(rect);
+ CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] colorWithAlphaComponent:0.5].CGColor);
+ CGContextStrokeRect(context, self.cropRect);
+ [[UIColor clearColor] setFill];
+ UIRectFill(CGRectInset(self.cropRect, 1, 1));
+ 
+ }
+ */
 
 @end
