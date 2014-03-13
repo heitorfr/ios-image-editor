@@ -31,12 +31,14 @@
 
 - (IBAction)setSquareAction:(id)sender
 {
+    [self.frameView setUseCircularImage:NO];
     self.cropRect = CGRectMake((self.frameView.frame.size.width-320)/2.0f, (self.frameView.frame.size.height-320)/2.0f, 320, 320);
     [self reset:YES];
 }
 
 - (IBAction)setLandscapeAction:(id)sender
 {
+    [self.frameView setUseCircularImage:NO];
     self.cropRect = CGRectMake((self.frameView.frame.size.width-320)/2.0f, (self.frameView.frame.size.height-240)/2.0f, 320, 240);
     [self reset:YES];
 }
@@ -44,10 +46,16 @@
 
 - (IBAction)setLPortraitAction:(id)sender
 {
+    [self.frameView setUseCircularImage:NO];
     self.cropRect = CGRectMake((self.frameView.frame.size.width-240)/2.0f, (self.frameView.frame.size.height-320)/2.0f, 240, 320);
     [self reset:YES];
 }
 
+- (IBAction)setCircularAction:(id)sender {
+    [self.frameView setUseCircularImage:YES];
+    self.cropRect = CGRectMake((self.frameView.frame.size.width-320)/2.0f, (self.frameView.frame.size.height-320)/2.0f, 319, 319);
+    [self reset:YES];
+}
 #pragma mark Hooks
 - (void)startTransformHook
 {

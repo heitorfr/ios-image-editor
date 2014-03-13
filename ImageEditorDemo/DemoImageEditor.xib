@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="iOS.CocoaTouch" variant="6xAndEarlier" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="4514" systemVersion="13C64" targetRuntime="iOS.CocoaTouch" variant="6xAndEarlier" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1296" identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3746"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3747"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DemoImageEditor">
@@ -31,7 +31,7 @@
                                 <action selector="cancelAction:" destination="-1" id="63"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem width="31" style="plain" systemItem="fixedSpace" id="60"/>
+                        <barButtonItem width="18" style="plain" systemItem="fixedSpace" id="60"/>
                         <barButtonItem title="S" width="25" id="52">
                             <connections>
                                 <action selector="setSquareAction:" destination="-1" id="64"/>
@@ -47,7 +47,12 @@
                                 <action selector="setLPortraitAction:" destination="-1" id="66"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem width="31" style="plain" systemItem="fixedSpace" id="61"/>
+                        <barButtonItem title="C" id="XeO-HC-Abd">
+                            <connections>
+                                <action selector="setCircularAction:" destination="-1" id="0ph-MV-ZZa"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem width="18" style="plain" systemItem="fixedSpace" id="61"/>
                         <barButtonItem title="Save" width="61" id="31">
                             <color key="tintColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                             <connections>
