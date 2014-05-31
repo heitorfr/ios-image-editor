@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "ios-image-editor"
-  s.version      = "1.1.4"
+  s.version      = "1.1.5"
   s.summary      = "iOS View Controller for image cropping. An alternative to the UIImagePickerController editor with extended features and flexibility."
 
   s.description  = <<-DESC
