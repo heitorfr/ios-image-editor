@@ -17,15 +17,14 @@ Features
 Usage
 -----
 
-<pre><code class="objc">
+```objective-c
 HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc] initWithNibName:@"DemoImageEditor" bundle:nil];
 
 imageEditor.sourceImage = image;
 imageEditor.doneCallback = ^(UIImage *editedImage, BOOL canceled){
     ...
 }
-</pre></code>
-
+```
 
 Configuration Properties
 ----------
@@ -37,7 +36,7 @@ The full resolution UIImage to crop
 
 For images larger than 1024 wide or 1024 height, the image editor will create a preview image before the view is shown. If a preview is already available you can get a faster transition by setting the preview propety. For instance, if the image was fetched using the <code>UIImagePickerController</code>:
 
-<pre><code class="objc">
+```objective-c
 UIImage *image =  [info objectForKey:UIImagePickerControllerOriginalImage];
 NSURL *assetURL = [info objectForKey:UIImagePickerControllerReferenceURL];
 
@@ -51,7 +50,7 @@ HFImageEditorViewController *imageEditor = [[HFImageEditorViewController alloc]
 } failureBlock:^(NSError *error) {
     NSLog(@"Failed to get asset from library");
 }];
-</pre></code>
+```
 
 #### doneCallback
 The callback block called when the image editor completes. Returns the cropped image and a BOOL that specifies if completion results from a <code>done</code> or <code>cancel</code> actions.
@@ -93,41 +92,6 @@ The demo app also shows how extended controlls can be implemented: three buttons
 
 Use the subclassing hooks (<code>startTransformHook</code>, <code>endTransformHook</code>) if you need to update the interface during image processing (to diable UI controls, for instance).
 
-
-ChangeLog
----------
-
-#### 1.1
-##### Features:
-
-* New <code>checkBounds</code> setting to bound the image scale and pan to avoid clear space.
-
-#### 1.1.1
-##### Features:
-
-* Crop rectangle does not have to be centered - use cropRect to specify the crop area instead of cropSize
-* One step transform - orientation fix and cropping on the same operation for improved memory footprint and speed
-
-##### Bug fixes:
-
-* Support all EXIF orientation 
-
-#### 1.1.2
-
-##### Bug fixes:
-
-Bound check now works correctly with any transform including rotation.
-
-#### 1.1.3
-
-ios-image-editor is now using ARC
-
-#### 1.1.4
-
-##### Bug fixes:
-<code>rotationEnabled</code>, <code>panEnabled</code>, <code>scaleEnabled</code>, <code>tapToResetEnabled</code> where being ignored if set before the editor view was loaded.
-
-#### 
 
 License
 ---------
