@@ -33,6 +33,3 @@ Bugfixes:
 
 * <code>rotationEnabled</code>, <code>panEnabled</code>, <code>scaleEnabled</code>, <code>tapToResetEnabled</code> where being ignored if set before the editor view was loaded.
 
-## 1.1.5
-
-Reorganized project to be more cocoapods-friendly. There are no code changes with this release.
