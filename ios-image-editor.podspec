@@ -18,6 +18,6 @@ Pod::Spec.new do |s|
   s.author       = { "Heitor Ferreira" => "me@heitor.fr" }
   s.platform     = :ios, "5.0"
   s.requires_arc = true 
-  s.source       = { :git => "https://github.com/heitorfr/ios-image-editor.git", :tag => "1.1.4" }
+  s.source       = { :git => "https://github.com/heitorfr/ios-image-editor.git", :tag => "1.1.5" }
   s.source_files = "ImageEditor/*.{h,m}"
 end
