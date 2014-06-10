@@ -303,11 +303,11 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                                         sourceImage:self.sourceImage.CGImage
                                          sourceSize:self.sourceImage.size
                                   sourceOrientation:self.sourceImage.imageOrientation
-                                        outputWidth:self.outputWidth ? self.outputWidth : self.sourceImage.size.width
+                                        outputWidth:self.outputWidth ? self.outputWidth : (self.sourceImage.size.width * self.sourceImage.scale)
                                             cropRect:self.cropRect
                                     imageViewSize:self.imageView.bounds.size];
         dispatch_async(dispatch_get_main_queue(), ^{
-            UIImage *transform =  [UIImage imageWithCGImage:resultRef scale:1.0 orientation:UIImageOrientationUp];
+            UIImage *transform =  [UIImage imageWithCGImage:resultRef scale:self.sourceImage.scale orientation:UIImageOrientationUp];
             CGImageRelease(resultRef);
             self.view.userInteractionEnabled = YES;
             if(self.doneCallback) {
