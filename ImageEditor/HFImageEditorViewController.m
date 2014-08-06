@@ -610,7 +610,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
                                                  0,
                                                  CGImageGetColorSpace(source),
                                                  CGImageGetBitmapInfo(source));
-    CGContextSetFillColorWithColor(context,  [[UIColor clearColor] CGColor]);
+    CGContextSetFillColorWithColor(context,  [self.view.backgroundColor CGColor]);
     CGContextFillRect(context, CGRectMake(0, 0, outputSize.width, outputSize.height));
     
     CGAffineTransform uiCoords = CGAffineTransformMakeScale(outputSize.width/cropRect.size.width,

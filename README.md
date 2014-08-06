@@ -68,7 +68,7 @@ The width of the cropped image. If not defined, the width of the source image is
 The bounds for image scaling. If not defined, image zoom is unlimited.
 
 #### checkBounds
-Set to true to bound the image transform so that you dont' get a black backround on the resulting image.
+Set to true to bound the image transform so that you dont' get a color of backround view on the resulting image.
 
 #### panEnabled, rotateEnabled, scaleEnabled, tapToResetEnabled
 BOOL property to enable/disable specific gestures
