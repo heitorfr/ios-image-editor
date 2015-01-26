@@ -139,8 +139,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 }
 
 
-
-
 - (void)setPanEnabled:(BOOL)panEnabled
 {
     _panEnabled = panEnabled;
@@ -260,24 +258,10 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
     self.imageView.image = self.previewImage;
     
     if(self.previewImage != self.sourceImage) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            CGImageRef hiresCGImage = NULL;
-            CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
-            CGSize size;
-            if(aspect >= 1.0) { //square or portrait
-                size = CGSizeMake(kMaxUIImageSize*aspect,kMaxUIImageSize);
-            } else { // landscape
-                size = CGSizeMake(kMaxUIImageSize,kMaxUIImageSize*aspect);
-            }
-            hiresCGImage = [self newScaledImage:self.sourceImage.CGImage withOrientation:self.sourceImage.imageOrientation toSize:size withQuality:kCGInterpolationDefault];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.imageView.image = [UIImage imageWithCGImage:hiresCGImage scale:1.0 orientation:UIImageOrientationUp];
-                CGImageRelease(hiresCGImage);
-            });
-        });
+        [self calculatePreview];
     }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Actions
@@ -439,7 +423,6 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         self.validTransform = transform;
     }
 }
-
 
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)recognizer
@@ -718,6 +701,25 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 }
 
 
+- (void)calculatePreview
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        CGImageRef hiresCGImage = NULL;
+        CGFloat aspect = self.sourceImage.size.height/self.sourceImage.size.width;
+        CGSize size;
+        if(aspect >= 1.0) { //square or portrait
+            size = CGSizeMake(kMaxUIImageSize*aspect,kMaxUIImageSize);
+        } else { // landscape
+            size = CGSizeMake(kMaxUIImageSize,kMaxUIImageSize*aspect);
+        }
+        hiresCGImage = [self newScaledImage:self.sourceImage.CGImage withOrientation:self.sourceImage.imageOrientation toSize:size withQuality:kCGInterpolationDefault];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.imageView.image = [UIImage imageWithCGImage:hiresCGImage scale:1.0 orientation:UIImageOrientationUp];
+            CGImageRelease(hiresCGImage);
+        });
+    });
+}
 
 @end
 
