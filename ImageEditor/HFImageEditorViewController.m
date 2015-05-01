@@ -426,7 +426,7 @@ static const NSTimeInterval kAnimationIntervalTransform = 0.2;
         self.validTransform = transform;
         return;
     }
-    CGRect r1 = [self boundingBoxForRect:self.cropRect rotatedByRadians:[self imageRotation]];
+    CGRect r1 = [self boundingBoxForRect:self.cropRect rotatedByRadians: -[self imageRotation]];
     Rectangle r2 = [self applyTransform:transform toRect:self.initialImageFrame];
     
     CGAffineTransform t = CGAffineTransformMakeTranslation(CGRectGetMidX(self.cropRect), CGRectGetMidY(self.cropRect));
