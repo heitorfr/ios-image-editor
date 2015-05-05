@@ -11,7 +11,6 @@ static const CGFloat kMaxUIImageSize = 1024;
 static const CGFloat kPreviewImageSize = 120;
 static const CGFloat kDefaultCropWidth = 320;
 static const CGFloat kDefaultCropHeight = 320;
-static const CGFloat kBoundingBoxInset = 15;
 static const NSTimeInterval kAnimationIntervalReset = 0.25;
 static const NSTimeInterval kAnimationIntervalTransform = 0.2;
 
