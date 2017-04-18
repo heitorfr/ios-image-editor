@@ -76,7 +76,7 @@ BOOL property to enable/disable specific gestures
 Output Properties
 ----------
 
-####cropBoundsInSourceImage
+#### cropBoundsInSourceImage
 Returns a CGRect representing the current crop rectangle in the source image coordinates. Source image coordinates have the origin at the bottom left of the image. Note that, if rotation has been applyed, then cropBoundsInSourceImage represents the bounding box of the rotated crop rectangle.
 
 
